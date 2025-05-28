@@ -7,4 +7,4 @@ jdk1.8 源码的中文翻译，基于qwen大模型。
 
 之后使用idea打开后台自动显示中文注释
 
-![](https://littleww.com.cn/static/images/99ec50356922ab1b6daf8ceb7ccf471c)
+![微信截图_20250528101904](https://github.com/user-attachments/assets/6829c705-998f-4a08-b6e3-b1c1e756dd5f)
