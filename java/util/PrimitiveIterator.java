@@ -1,0 +1,272 @@
+
+/*
+ * 版权所有 (c) 2013, Oracle 和/或其附属公司。保留所有权利。
+ * ORACLE 专有/机密。使用受许可条款约束。
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+package java.util;
+
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
+
+/**
+ * {@code Iterator} 的原始类型特化的基类型。提供了 {@link OfInt int}、{@link OfLong long} 和
+ * {@link OfDouble double} 值的特化子类型。
+ *
+ * <p>特化子类型默认实现了 {@link Iterator#next} 和 {@link Iterator#forEachRemaining(java.util.function.Consumer)} 方法，
+ * 这些方法将原始值装箱为其对应的包装类实例。这种装箱可能会抵消使用原始类型特化所获得的任何优势。为了避免装箱，
+ * 应使用相应的基于原始类型的方法。例如，应优先使用 {@link PrimitiveIterator.OfInt#nextInt()} 和
+ * {@link PrimitiveIterator.OfInt#forEachRemaining(java.util.function.IntConsumer)} 而不是
+ * {@link PrimitiveIterator.OfInt#next()} 和 {@link PrimitiveIterator.OfInt#forEachRemaining(java.util.function.Consumer)}。
+ *
+ * <p>使用基于装箱的方法 {@link Iterator#next next()} 和
+ * {@link Iterator#forEachRemaining(java.util.function.Consumer) forEachRemaining()} 迭代原始值，
+ * 不会影响值（转换为装箱值）的顺序。
+ *
+ * @implNote
+ * 如果布尔系统属性 {@code org.openjdk.java.util.stream.tripwire} 设置为 {@code true}，
+ * 则在对原始类型特化子类型进行操作时，如果发生原始值的装箱，将报告诊断警告。
+ *
+ * @param <T> 该 PrimitiveIterator 返回的元素类型。该类型必须是原始类型的包装类型，例如
+ *        {@code Integer} 对于原始类型 {@code int}。
+ * @param <T_CONS> 原始消费者类型。该类型必须是 {@link java.util.function.Consumer} 的原始类型特化，
+ *        例如 {@link java.util.function.IntConsumer} 对于 {@code Integer}。
+ *
+ * @since 1.8
+ */
+public interface PrimitiveIterator<T, T_CONS> extends Iterator<T> {
+
+    /**
+     * 对每个剩余元素执行给定的操作，按迭代时元素出现的顺序，直到所有元素都被处理或操作抛出异常。
+     * 操作抛出的错误或运行时异常将传递给调用者。
+     *
+     * @param action 要对每个元素执行的操作
+     * @throws NullPointerException 如果指定的操作为 null
+     */
+    @SuppressWarnings("overloads")
+    void forEachRemaining(T_CONS action);
+
+    /**
+     * 专门用于 {@code int} 值的 Iterator。
+     * @since 1.8
+     */
+    public static interface OfInt extends PrimitiveIterator<Integer, IntConsumer> {
+
+        /**
+         * 返回迭代中的下一个 {@code int} 元素。
+         *
+         * @return 迭代中的下一个 {@code int} 元素
+         * @throws NoSuchElementException 如果迭代没有更多元素
+         */
+        int nextInt();
+
+        /**
+         * 对每个剩余元素执行给定的操作，直到所有元素都被处理或操作抛出异常。操作按迭代顺序执行，如果指定了迭代顺序。
+         * 操作抛出的异常将传递给调用者。
+         *
+         * @implSpec
+         * <p>默认实现的行为类似于：
+         * <pre>{@code
+         *     while (hasNext())
+         *         action.accept(nextInt());
+         * }</pre>
+         *
+         * @param action 要对每个元素执行的操作
+         * @throws NullPointerException 如果指定的操作为 null
+         */
+        default void forEachRemaining(IntConsumer action) {
+            Objects.requireNonNull(action);
+            while (hasNext())
+                action.accept(nextInt());
+        }
+
+        /**
+         * {@inheritDoc}
+         * @implSpec
+         * 默认实现调用 {@link #nextInt()} 并返回装箱结果。
+         */
+        @Override
+        default Integer next() {
+            if (Tripwire.ENABLED)
+                Tripwire.trip(getClass(), "{0} calling PrimitiveIterator.OfInt.nextInt()");
+            return nextInt();
+        }
+
+        /**
+         * {@inheritDoc}
+         * @implSpec
+         * 如果操作是 {@code IntConsumer} 的实例，则将其转换为 {@code IntConsumer} 并传递给 {@link #forEachRemaining}；
+         * 否则，通过装箱 {@code IntConsumer} 的参数将操作适配为 {@code IntConsumer} 的实例，然后传递给 {@link #forEachRemaining}。
+         */
+        @Override
+        default void forEachRemaining(Consumer<? super Integer> action) {
+            if (action instanceof IntConsumer) {
+                forEachRemaining((IntConsumer) action);
+            }
+            else {
+                // 方法引用 action::accept 永远不会为 null
+                Objects.requireNonNull(action);
+                if (Tripwire.ENABLED)
+                    Tripwire.trip(getClass(), "{0} calling PrimitiveIterator.OfInt.forEachRemainingInt(action::accept)");
+                forEachRemaining((IntConsumer) action::accept);
+            }
+        }
+
+    }
+
+    /**
+     * 专门用于 {@code long} 值的 Iterator。
+     * @since 1.8
+     */
+    public static interface OfLong extends PrimitiveIterator<Long, LongConsumer> {
+
+        /**
+         * 返回迭代中的下一个 {@code long} 元素。
+         *
+         * @return 迭代中的下一个 {@code long} 元素
+         * @throws NoSuchElementException 如果迭代没有更多元素
+         */
+        long nextLong();
+
+        /**
+         * 对每个剩余元素执行给定的操作，直到所有元素都被处理或操作抛出异常。操作按迭代顺序执行，如果指定了迭代顺序。
+         * 操作抛出的异常将传递给调用者。
+         *
+         * @implSpec
+         * <p>默认实现的行为类似于：
+         * <pre>{@code
+         *     while (hasNext())
+         *         action.accept(nextLong());
+         * }</pre>
+         *
+         * @param action 要对每个元素执行的操作
+         * @throws NullPointerException 如果指定的操作为 null
+         */
+        default void forEachRemaining(LongConsumer action) {
+            Objects.requireNonNull(action);
+            while (hasNext())
+                action.accept(nextLong());
+        }
+
+
+                    /**
+         * {@inheritDoc}
+         * @implSpec
+         * 默认实现将调用 {@link #nextLong()} 的结果装箱，并返回该装箱结果。
+         */
+        @Override
+        default Long next() {
+            if (Tripwire.ENABLED)
+                Tripwire.trip(getClass(), "{0} calling PrimitiveIterator.OfLong.nextLong()");
+            return nextLong();
+        }
+
+        /**
+         * {@inheritDoc}
+         * @implSpec
+         * 如果操作是 {@code LongConsumer} 的实例，则将其转换为 {@code LongConsumer} 并传递给 {@link #forEachRemaining}；
+         * 否则，通过装箱 {@code LongConsumer} 的参数将操作适配为 {@code LongConsumer} 的实例，然后传递给 {@link #forEachRemaining}。
+         */
+        @Override
+        default void forEachRemaining(Consumer<? super Long> action) {
+            if (action instanceof LongConsumer) {
+                forEachRemaining((LongConsumer) action);
+            }
+            else {
+                // 方法引用 action::accept 从不为 null
+                Objects.requireNonNull(action);
+                if (Tripwire.ENABLED)
+                    Tripwire.trip(getClass(), "{0} calling PrimitiveIterator.OfLong.forEachRemainingLong(action::accept)");
+                forEachRemaining((LongConsumer) action::accept);
+            }
+        }
+    }
+
+    /**
+     * 专门用于 {@code double} 值的迭代器。
+     * @since 1.8
+     */
+    public static interface OfDouble extends PrimitiveIterator<Double, DoubleConsumer> {
+
+        /**
+         * 返回迭代中的下一个 {@code double} 元素。
+         *
+         * @return 迭代中的下一个 {@code double} 元素
+         * @throws NoSuchElementException 如果迭代没有更多元素
+         */
+        double nextDouble();
+
+        /**
+         * 对每个剩余元素执行给定操作，直到所有元素都被处理或操作抛出异常。如果指定了迭代顺序，则按该顺序执行操作。
+         * 操作抛出的异常将传递给调用者。
+         *
+         * @implSpec
+         * <p>默认实现的行为类似于：
+         * <pre>{@code
+         *     while (hasNext())
+         *         action.accept(nextDouble());
+         * }</pre>
+         *
+         * @param action 要为每个元素执行的操作
+         * @throws NullPointerException 如果指定的操作为 null
+         */
+        default void forEachRemaining(DoubleConsumer action) {
+            Objects.requireNonNull(action);
+            while (hasNext())
+                action.accept(nextDouble());
+        }
+
+        /**
+         * {@inheritDoc}
+         * @implSpec
+         * 默认实现将调用 {@link #nextDouble()} 的结果装箱，并返回该装箱结果。
+         */
+        @Override
+        default Double next() {
+            if (Tripwire.ENABLED)
+                Tripwire.trip(getClass(), "{0} calling PrimitiveIterator.OfDouble.nextLong()");
+            return nextDouble();
+        }
+
+        /**
+         * {@inheritDoc}
+         * @implSpec
+         * 如果操作是 {@code DoubleConsumer} 的实例，则将其转换为 {@code DoubleConsumer} 并传递给 {@link #forEachRemaining}；
+         * 否则，通过装箱 {@code DoubleConsumer} 的参数将操作适配为 {@code DoubleConsumer} 的实例，然后传递给 {@link #forEachRemaining}。
+         */
+        @Override
+        default void forEachRemaining(Consumer<? super Double> action) {
+            if (action instanceof DoubleConsumer) {
+                forEachRemaining((DoubleConsumer) action);
+            }
+            else {
+                // 方法引用 action::accept 从不为 null
+                Objects.requireNonNull(action);
+                if (Tripwire.ENABLED)
+                    Tripwire.trip(getClass(), "{0} calling PrimitiveIterator.OfDouble.forEachRemainingDouble(action::accept)");
+                forEachRemaining((DoubleConsumer) action::accept);
+            }
+        }
+    }
+}
