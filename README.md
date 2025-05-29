@@ -1,7 +1,7 @@
 # jdk1_8_chinese
 jdk1.8 源码的中文翻译、整理是基于 AI 大模型。
 
-源码是使用 jdk1.8.0_341 自带的 src.zip
+源码是使用 [openjdk8](https://github.com/openjdk/jdk8u/tree/master)
 
 # 使用方法
 
