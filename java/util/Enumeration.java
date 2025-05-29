@@ -1,41 +1,41 @@
 /*
- * 版权所有 (c) 1994, 2005，Oracle和/或其附属公司。保留所有权利。
- * ORACLE 专有/机密。使用受许可条款约束。
+ * Copyright (c) 1994, 2005, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
  *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package java.util;
 
 /**
- * 实现 Enumeration 接口的对象一次生成一系列元素中的一个。对 <code>nextElement</code> 方法的连续调用将返回该系列的连续元素。
+ * 实现 Enumeration 接口的对象生成一系列元素，一次一个。对 <code>nextElement</code> 方法的连续调用返回该系列的连续元素。
  * <p>
- * 例如，要打印 <tt>Vector&lt;E&gt;</tt> <i>v</i> 的所有元素：
+ * 例如，打印 <tt>Vector&lt;E&gt;</tt> <i>v</i> 的所有元素：
  * <pre>
  *   for (Enumeration&lt;E&gt; e = v.elements(); e.hasMoreElements();)
  *       System.out.println(e.nextElement());</pre>
  * <p>
- * 提供了枚举向量的元素、哈希表的键以及哈希表中的值的方法。枚举还用于指定 <code>SequenceInputStream</code> 的输入流。
+ * 提供了枚举向量的元素、哈希表的键和哈希表中的值的方法。枚举还用于指定 <code>SequenceInputStream</code> 的输入流。
  * <p>
- * 注意：此接口的功能已被 Iterator 接口复制。此外，Iterator 增加了一个可选的移除操作，并且具有更短的方法名。新实现应考虑优先使用 Iterator 而不是 Enumeration。
+ * 注意：此接口的功能已被 Iterator 接口复制。此外，Iterator 添加了一个可选的 remove 操作，并且方法名更短。新实现应考虑优先使用 Iterator 而不是 Enumeration。
  *
  * @see     java.util.Iterator
  * @see     java.io.SequenceInputStream
