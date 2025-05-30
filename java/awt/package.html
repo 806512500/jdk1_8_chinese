@@ -1,0 +1,71 @@
+<!--
+ Copyright (c) 1998, 2013, Oracle and/or its affiliates. All rights reserved.
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+ This code is free software; you can redistribute it and/or modify it
+ under the terms of the GNU General Public License version 2 only, as
+ published by the Free Software Foundation.  Oracle designates this
+ particular file as subject to the "Classpath" exception as provided
+ by Oracle in the LICENSE file that accompanied this code.
+
+ This code is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ version 2 for more details (a copy is included in the LICENSE file that
+ accompanied this code).
+
+ You should have received a copy of the GNU General Public License version
+ 2 along with this work; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+ Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ or visit www.oracle.com if you need additional information or have any
+ questions.
+-->
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head><title></title></head>
+<body bgcolor="white">
+
+包含用于创建用户界面和绘制图形和图像的所有类。在 AWT 术语中，按钮或滚动条等用户界面对象称为组件。Component 类是所有 AWT 组件的根类。有关所有 AWT 组件共享的属性的详细描述，请参阅 Component。
+<p>
+当用户与组件交互时，某些组件会触发事件。AWTEvent 类及其子类用于表示 AWT 组件可以触发的事件。有关 AWT 事件模型的描述，请参阅 AWTEvent。
+<p>
+容器是一种可以包含组件和其他容器的组件。容器还可以具有控制容器中组件视觉布局的布局管理器。AWT 包含多个布局管理器类和一个用于构建自定义布局管理器的接口。有关更多信息，请参阅 Container 和 LayoutManager。
+<p>
+每个 {@code Component} 对象在最大尺寸和位置上都有限制，因为这些值存储为整数。
+此外，平台可能会进一步限制最大尺寸和位置坐标。
+确切的最大值取决于平台。
+无法通过 Java 代码或本机代码更改这些最大值。
+这些限制也对组件布局施加了限制。
+如果 Component 对象的边界超过平台限制，
+则无法在 Container 对象中正确排列它们。
+对象的边界由任何对象的坐标与其在相应轴上的大小的组合定义。
+
+
+<h2>附加规范</h2>
+<ul>
+<li><a href="doc-files/FocusSpec.html">AWT 焦点子系统</a>
+<li><a href="doc-files/Modality.html">AWT 模态</a>
+</ul>
+
+<!--
+<h2>包规范</h2>
+
+##### 填写 Java 兼容性工具包所需的任何规范 #####
+<ul>
+  <li><a href="">##### 在此处引用任何 Framemaker 规范 #####</a>
+</ul>
+
+<h2>相关文档</h2>
+
+有关概述、教程、示例、指南和工具文档，请参阅：
+<ul>
+  <li><a href="">##### 在此处引用非规范文档 #####</a>
+</ul>
+-->
+
+@since JDK1.0
+</body>
+</html>

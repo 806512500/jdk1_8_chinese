@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!--This file created 7/22/1999 11:47 by Claris Home Page version 2.0-->
+<HTML>
+<HEAD>
+   <TITLE>包 java.awt.im.spi 描述</TITLE>
+   <META NAME=GENERATOR CONTENT="Claris Home Page 2.0">
+   <X-SAS-WINDOW TOP=51 BOTTOM=592 LEFT=171 RIGHT=701>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<P>提供接口，使能够开发可在任何 Java 运行时环境中使用的输入法。输入法是允许用户以键盘简单输入以外的方式输入文本的软件组件。它们通常用于输入使用数千个不同字符的语言（如日语、中文或韩语）的键盘上，这些语言的键数远少于字符数。然而，此包也允许为其他语言开发输入法，并使用完全不同的输入机制，如手写识别。</P>
+
+<H2><A NAME="package_specification"></A>包规范</H2>
+
+<UL>
+   <LI><B><A HREF="../../../../../technotes/guides/imf/spec.html">输入法框架规范</A></B>
+   
+   <LI><B><A HREF="../../../../../technotes/guides/imf/spi-reference.html">输入法引擎 SPI 参考</A></B>
+</UL>
+
+<H4><A NAME="Packaging"></A>打包输入法</H4>
+
+<P>输入法作为已安装的扩展进行打包，如 <A HREF="../../../../../technotes/guides/extensions/index.html">扩展机制</A> 所指定。输入法的主要 JAR 文件必须包含以下文件：</P>
+
+<PRE>    META-INF/services/java.awt.im.spi.InputMethodDescriptor</PRE>
+
+<P>该文件应包含一个完全限定的类名列表，每个类名一行，这些类实现 <CODE>java.awt.im.spi.InputMethodDescriptor</CODE> 接口。每个名称周围的空格和制表符以及空白行将被忽略。注释字符是 <CODE>'#'</CODE> (<CODE>\u0023</CODE>)；每行中第一个注释字符之后的所有字符都将被忽略。文件必须使用 UTF-8 编码。</P>
+
+<P>例如，如果实现 <CODE>java.awt.im.spi.InputMethodDesciptor</CODE> 接口的类的完全限定名称为 <CODE>com.sun.ime.FooInputMethodDescriptor</CODE>，则文件 <CODE>META-INF/services/java.awt.im.spi.InputMethodDescriptor</CODE> 包含一行：</P>
+
+<PRE>    com.sun.ime.FooInputMethodDescriptor</PRE>
+
+<P>输入法还必须至少提供两个类：一个类实现 <CODE>java.awt.im.spi.InputMethodDescriptor</CODE> 接口，一个类实现 <CODE>java.awt.im.spi.InputMethod</CODE> 接口。输入法应将这些接口的实现分开，以便在实际需要时延迟加载实现 <CODE>InputMethod</CODE> 的类。</P>
+
+<H4><A NAME="Loading"></A>加载输入法</H4>
+
+<P>输入法框架通常会延迟加载输入法类，直到它们绝对需要时。在 AWT 初始化期间，它仅加载 <CODE>InputMethodDescriptor</CODE> 实现。当选择输入法时，它加载 <CODE>InputMethod</CODE> 实现。</P>
+
+<H4><A NAME="PeeredComponents"></A>Java 输入法和对等文本组件</H4>
+
+<P>Java 输入法框架旨在支持所有输入法（主机输入法和 Java 输入法）和组件（对等和轻量级）的组合。然而，由于底层平台的限制，可能无法始终启用 Java 输入法和对等 AWT 组件之间的通信。因此，这种特定组合的支持是平台依赖的。在 Sun 的 Java SE 运行时环境中，此组合在 Windows 上受支持，但在 Solaris 上不受支持。</P>
+
+<H2>相关文档</H2>
+
+<P>有关概述、教程、示例、指南和工具文档，请参阅：</P>
+
+<UL>
+   <LI><B><A HREF="../../../../../technotes/guides/imf/overview.html">输入法框架概述</A></B>
+   
+   <LI><B><A HREF="../../../../../technotes/guides/imf/spi-tutorial.html">输入法引擎 SPI 教程</A></B>
+</UL>
+
+@since JDK1.3
+</BODY>
+</HTML>

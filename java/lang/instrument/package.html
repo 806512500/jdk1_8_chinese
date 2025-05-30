@@ -1,0 +1,222 @@
+html
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<!--
+
+  Copyright 2003 Wily Technology, Inc.
+
+-->
+</head>
+
+<body bgcolor="white">
+
+提供服务，允许 Java 编程语言代理对在 JVM 上运行的程序进行仪器化。
+仪器化的机制是修改方法的字节码。
+
+<P>
+注意：开发人员/管理员负责验证他们部署的 Java 代理的内容和结构的可信度，因为这些代理能够任意转换其他 JAR 文件中的字节码。由于这种转换发生在包含字节码的 JAR 文件被验证为可信之后，因此 Java 代理的可信度可以决定整个程序的可信度。
+
+<h2>包规范</h2>
+
+<P> 
+代理以 JAR 文件的形式部署。JAR 文件清单中的一个属性指定了将被加载以启动代理的代理类。对于支持命令行接口的实现，代理通过在命令行上指定一个选项来启动。实现也可能支持在 VM 启动后一段时间启动代理的机制。例如，实现可能提供一种机制，允许工具“附加”到正在运行的应用程序，并启动将工具的代理加载到正在运行的应用程序中。加载的启动方式取决于具体的实现。
+
+<h3>命令行接口</h3>
+
+<P> 
+实现不需要提供从命令行接口启动代理的方式。在提供从命令行接口启动代理的实现中，通过在命令行上添加以下选项来启动代理：
+<blockquote>
+<code><b>-javaagent:</b></code><i>jarpath[</i><code><b>=</b></code><i>options]</i>
+</blockquote>
+<i>jarpath</i> 是代理 JAR 文件的路径。
+<i>options</i> 是代理选项。
+此开关可以在同一命令行上多次使用，从而创建多个代理。
+多个代理可以使用相同的 <i>jarpath</i>。
+代理 JAR 文件必须符合 JAR 文件规范。
+
+<P>
+代理 JAR 文件的清单必须包含 <code>Premain-Class</code> 属性。此属性的值是 <i>代理类</i> 的名称。代理类必须实现一个类似于 <code>main</code> 应用程序入口点的公共静态 <code>premain</code> 方法。在 Java 虚拟机 (JVM) 初始化后，每个 <code>premain</code> 方法将按代理指定的顺序调用，然后调用实际应用程序的 <code>main</code> 方法。
+每个 <code>premain</code> 方法必须返回，以便启动序列继续。
+
+<P>
+<code>premain</code> 方法有两种可能的签名。JVM 首先尝试在代理类上调用以下方法：
+
+<blockquote>
+<code>public static void
+premain(String agentArgs, Instrumentation inst);
+</code>
+</blockquote>
+
+<P>
+如果代理类没有实现此方法，JVM 将尝试调用：
+
+<blockquote>
+<code>public static void
+premain(String agentArgs);
+</code>
+</blockquote>
+
+<P>
+代理类也可以有一个 <code>agentmain</code> 方法，用于在 VM 启动后启动代理。当代理使用命令行选项启动时，不会调用 <code>agentmain</code> 方法。
+
+
+<P>
+代理类将由系统类加载器加载
+（参见 {@link java.lang.ClassLoader#getSystemClassLoader ClassLoader.getSystemClassLoader}）。这通常是加载包含应用程序 <code>main</code> 方法的类的类加载器。
+<code>premain</code> 方法将在与应用程序 <code>main</code> 方法相同的安全性和类加载器规则下运行。
+代理 <code>premain</code> 方法没有建模限制。
+应用程序 <code>main</code> 可以做的任何事情，包括创建线程，从 <code>premain</code> 中都是合法的。
+
+<P>
+每个代理通过 <code>agentArgs</code> 参数传递其代理选项。
+代理选项作为单个字符串传递，
+任何额外的解析应由代理本身执行。
+
+<P>
+如果代理无法解析
+（例如，因为代理类无法加载，
+或者因为代理类没有适当的 <code>premain</code> 方法），JVM 将中止。
+如果 <code>premain</code> 方法抛出未捕获的异常，JVM 将中止。
+
+
+
+<h3>在 VM 启动后启动代理</h3>
+
+<p>
+实现可能提供一种机制，在 VM 启动后一段时间启动代理。启动的具体方式取决于具体的实现，但通常应用程序已经启动，其 <code>
+main</code> 方法已经被调用。在支持在 VM 启动后启动代理的实现中，以下内容适用：
+
+<ol>
+  <li><p>代理 JAR 的清单必须包含 <code>Agent-Class</code> 属性。 
+      此属性的值是 <i>代理类</i> 的名称。 </p></li> 
+      
+  <li><p>代理类必须实现一个公共静态 <code>agentmain</code> 方法。 </p></li>
+
+  <li><p>系统类加载器 (
+      {@link java.lang.ClassLoader#getSystemClassLoader ClassLoader.getSystemClassLoader}) 必须
+      支持将代理 JAR 文件添加到系统类路径的机制。 <p></li>
+</ol>  
+
+<P>
+代理 JAR 被追加到系统类路径中。这通常是加载包含应用程序 <code>main</code> 方法的类的类加载器。代理类被加载，JVM 尝试调用 <code>agentmain</code> 方法。JVM 首先尝试在代理类上调用以下方法：
+
+<blockquote>
+<code>public static void
+agentmain(String agentArgs, Instrumentation inst);
+</code>
+</blockquote>
+
+<P>
+如果代理类没有实现此方法，JVM 将尝试调用：
+
+<blockquote>
+<code>public static void
+agentmain(String agentArgs);
+</code>
+</blockquote>
+
+<P>
+代理类也可以有一个 <code>premain</code> 方法，用于在使用命令行选项启动代理时使用。当代理在 VM 启动后启动时，不会调用 <code>premain</code> 方法。
+
+
+<P>
+代理通过 <code>agentArgs</code> 参数传递其代理选项。
+代理选项作为单个字符串传递，
+任何额外的解析应由代理本身执行。 
+
+<P>
+<code>agentmain</code> 方法应执行启动代理所需的任何必要初始化。
+启动完成后，方法应返回。如果代理无法启动
+（例如，因为代理类无法加载，
+或者因为代理类没有符合要求的 <code>agentmain</code> 方法），JVM 不会中止。如果 <code>agentmain</code> 方法抛出未捕获的异常，它将被忽略。
+
+
+
+<h3>清单属性</h3>
+为代理 JAR 文件定义了以下清单属性：
+<blockquote>
+<dl>
+<dt><code>Premain-Class</code></dt>
+<dd>
+                        当代理在 JVM 启动时指定时，此属性
+			指定代理类。
+			即，包含 <code>premain</code> 方法的类。
+                        当代理在 JVM 启动时指定时，此属性
+			是必需的。如果属性不存在，JVM 将中止。
+                        注意：这是一个类名，而不是文件名或路径。							
+</dd>
+
+<dt><code>Agent-Class</code></dt>
+<dd>
+                        如果实现支持在 VM 启动后一段时间启动代理的机制，则此属性指定
+                        代理类。
+			即，包含 <code>agentmain</code> 方法的类。
+                        如果此属性不存在，代理
+                        将不会启动。
+                        注意：这是一个类名，而不是文件名或路径。
+</dd>			
+
+<dt><code>Boot-Class-Path</code></dt>
+<dd>
+                        要由引导类
+                        加载器搜索的路径列表。路径表示目录或库
+                        （在许多平台上通常称为 JAR 或 zip 库）。 			
+                        这些路径在平台特定的定位类的机制失败后由
+                        引导类加载器搜索。
+                        路径按列出的顺序搜索。
+                        列表中的路径由一个或多个空格分隔。
+                        路径采用分层 URI 的路径组件的语法。路径
+                        如果以斜杠字符 ('/') 开头，则为绝对路径，
+                        否则为相对路径。相对路径解析为
+                        代理 JAR 文件的绝对路径。
+                        格式错误和不存在的路径将被忽略。	
+			当代理在 VM 启动后一段时间启动时，不表示 JAR 文件的路径
+			将被忽略。
+                        此属性是可选的。
+</dd>
+<dt><code>Can-Redefine-Classes</code></dt>
+<dd>
+                        布尔值（<code>true</code> 或 <code>false</code>，不区分大小写）。
+                        此代理是否需要重新定义类的能力。
+                        除 <code>true</code> 以外的值被视为 <code>false</code>。
+                        此属性是可选的，默认值为 <code>false</code>。
+</dd>
+<dt><code>Can-Retransform-Classes</code></dt>
+<dd>
+                        布尔值（<code>true</code> 或 <code>false</code>，不区分大小写）。
+                        此代理是否需要重新转换类的能力。
+                        除 <code>true</code> 以外的值被视为 <code>false</code>。
+                        此属性是可选的，默认值为 <code>false</code>。
+</dd>
+<dt><code>Can-Set-Native-Method-Prefix</code></dt>
+<dd>
+                        布尔值（<code>true</code> 或 <code>false</code>，不区分大小写）。
+                        此代理是否需要设置本地方法前缀的能力。
+                        除 <code>true</code> 以外的值被视为 <code>false</code>。
+                        此属性是可选的，默认值为 <code>false</code>。
+</dd>
+</dl>
+</blockquote>
+
+<p> 
+代理 JAR 文件的清单中可以同时存在 <code>Premain-Class</code> 和 <code>Agent-Class</code>
+属性。当代理通过命令行使用
+<code>-javaagent</code> 选项启动时，<code>Premain-Class</code> 属性
+指定代理类的名称，<code>Agent-Class</code> 属性
+被忽略。同样，如果代理在 VM 启动后一段时间启动，则
+<code>Agent-Class</code> 属性指定代理类的名称
+（<code>Premain-Class</code> 属性的值被忽略）。
+
+<h2>相关文档</h2>
+
+有关工具文档，请参见：
+<ul>
+  <li><a href="{@docRoot}/../technotes/tools/index.html">JDK 工具和实用程序</a>
+</ul>
+
+@since JDK1.5
+@revised 1.6
+
+</body>
+</html>

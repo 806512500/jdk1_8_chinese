@@ -1,0 +1,197 @@
+html
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<body bgcolor="white">
+
+提供用于监控和管理 Java 虚拟机和其他 Java 运行时组件的管理接口。
+它允许对正在运行的 Java 虚拟机进行本地和远程监控和管理。
+<p>
+
+<h4><a name="MXBean">平台 MXBean</a></h4>
+<p>
+平台 MXBean 是一个符合 <a href="../../../javax/management/package-summary.html">JMX</a>
+仪器规范的<i>管理 bean</i>，并且仅使用一组基本数据类型。
+每个平台 MXBean 都是一个 {@link java.lang.management.PlatformManagedObject}，
+并具有一个唯一的
+{@linkplain java.lang.management.PlatformManagedObject#getObjectName 名称}。
+<p>
+<h4>管理工厂</h4>
+
+<p>{@link java.lang.management.ManagementFactory} 类是 Java 平台的管理工厂类。
+该类提供了一组静态工厂方法，用于获取 Java 平台的 MXBean，以便应用程序可以直接访问 MXBean。
+
+<p>可以通过
+{@link java.lang.management.ManagementFactory#getPlatformMBeanServer
+ getPlatformMBeanServer} 方法访问 <em>平台 MBeanServer</em>。
+首次调用此方法时，它会创建平台 MBeanServer 并注册所有平台 MXBean
+包括 {@linkplain java.lang.management.PlatformManagedObject
+平台 MXBeans}。
+每个平台 MXBean 都会使用管理接口规范中定义的唯一名称进行注册。
+这是可以在同一 Java 虚拟机内由不同管理组件共享的单个 MBeanServer。
+
+<h4>互操作性</h4>
+
+<p>管理应用程序和正在运行的虚拟机的平台 MBeanServer 可以互操作
+而无需使用平台 MXBean 接口所使用的类。
+通过 JMX 连接器服务器和连接器客户端传输的数据类型是 JMX
+{@linkplain javax.management.openmbean.OpenType 开放类型}，
+这允许跨版本互操作。
+当通过 MBeanServer 接口访问 MXBean 接口时，MXBean 接口使用的数据类型将映射到开放类型。
+详细信息请参阅 <a href="../../../javax/management/MXBean.html#MXBean-spec">
+MXBean</a> 规范。
+
+<h4><a name="examples">访问 MXBean 的方法</a></h4>
+
+<p>应用程序可以通过以下方式监控 Java 虚拟机和运行时的仪器：
+<p>
+<b>1. 直接访问 MXBean 接口</b>
+<p>
+<ul>
+<li>在正在运行的 Java 虚拟机中本地获取 MXBean 实例：
+<pre>
+   RuntimeMXBean mxbean = ManagementFactory.getRuntimeMXBean();
+
+   // 获取标准属性 "VmVendor"
+   String vendor = mxbean.getVmVendor();
+</pre>
+<p>或者通过调用
+        {@link java.lang.management.ManagementFactory#getPlatformMXBean(Class)
+               getPlatformMXBean} 或
+        {@link java.lang.management.ManagementFactory#getPlatformMXBeans(Class)
+               getPlatformMXBeans} 方法：
+<pre>
+   RuntimeMXBean mxbean = ManagementFactory.getPlatformMXBean(RuntimeMXBean.class);
+
+   // 获取标准属性 "VmVendor"
+   String vendor = mxbean.getVmVendor();
+</pre>
+<p>
+</li>
+<li>构建一个 MXBean 代理实例，该实例将方法调用转发到给定的 MBeanServer：
+<pre>
+   MBeanServerConnection mbs;
+
+   // 连接到正在运行的 JVM（或自身）并获取已注册 JVM MBeans 的 MBeanServerConnection
+   ...
+
+   // 获取 RuntimeMXBean 接口的 MBean 代理
+   RuntimeMXBean proxy =
+       {@link java.lang.management.ManagementFactory#getPlatformMXBean(MBeanServerConnection, Class)
+       ManagementFactory.getPlatformMXBean}(mbs,
+                                           RuntimeMXBean.class);
+   // 获取标准属性 "VmVendor"
+   String vendor = proxy.getVmVendor();
+</pre>
+<p>代理通常用于访问远程 Java 虚拟机中的 MXBean。
+创建 MXBean 代理的另一种方法是：
+<pre>
+   RuntimeMXBean proxy =
+       {@link java.lang.management.ManagementFactory#newPlatformMXBeanProxy
+              ManagementFactory.newPlatformMXBeanProxy}(mbs,
+                                                ManagementFactory.RUNTIME_MXBEAN_NAME,
+                                                RuntimeMXBean.class);
+</pre>
+</li>
+</ul>
+<p>
+<b>2. 通过 MBeanServer 间接访问 MXBean 接口</b><p>
+<ul>
+<li>通过
+    {@link java.lang.management.ManagementFactory#getPlatformMBeanServer
+    平台 MBeanServer} 本地访问 MXBean 或
+    通过特定的 {@code MBeanServerConnection} 远程访问 MXBean。
+    MXBean 的属性和操作仅使用
+    <em>JMX 开放类型</em>，包括基本数据类型、
+    {@link javax.management.openmbean.CompositeData CompositeData} 和
+    {@link javax.management.openmbean.TabularData TabularData}，
+    这些类型在 {@link javax.management.openmbean.OpenType OpenType} 中定义。<p>
+<pre>
+   MBeanServerConnection mbs;
+
+   // 连接到正在运行的 JVM（或自身）并获取已注册 JVM MXBeans 的 MBeanServerConnection
+   ...
+
+   try {
+       // 假设 RuntimeMXBean 已在 mbs 中注册
+       ObjectName oname = new ObjectName(ManagementFactory.RUNTIME_MXBEAN_NAME);
+
+       // 获取标准属性 "VmVendor"
+       String vendor = (String) mbs.getAttribute(oname, "VmVendor");
+   } catch (....) {
+       // 捕获 ObjectName 构造函数和 MBeanServer.getAttribute 方法抛出的异常
+       ...
+   }
+</pre>
+</li>
+</ul>
+
+
+<h4><a name="extension">平台扩展</a></h4>
+
+<p>Java 虚拟机实现可以通过定义扩展标准管理接口的平台依赖接口来添加其平台扩展，
+以包含平台特定的指标和管理操作。
+<tt>ManagementFactory</tt> 类中的静态工厂方法将
+返回带有平台扩展的 MXBean。
+
+<p>
+建议使用供应商特定的前缀（如供应商名称）命名平台特定的属性，
+以避免标准管理接口的未来扩展与平台扩展之间的属性名称冲突。
+如果标准管理接口的未来扩展为管理接口定义了一个新属性，
+并且该属性名称恰好与某个供应商特定属性的名称相同，
+则访问该供应商特定属性的应用程序将需要进行修改以应对版本和兼容性问题。
+
+<p>以下示例展示了如何访问平台扩展中的属性：
+
+<p>
+1) 直接访问 Oracle 特定的 MXBean 接口
+<blockquote>
+<pre>
+   List&lt;com.sun.management.GarbageCollectorMXBean&gt; mxbeans =
+       ManagementFactory.getPlatformMXBeans(com.sun.management.GarbageCollectorMXBean.class);
+
+   for (com.sun.management.GarbageCollectorMXBean gc : mxbeans) {
+       // 获取标准属性 "CollectionCount"
+       String count = mxbean.getCollectionCount();
+
+       // 获取平台特定的属性 "LastGcInfo"
+       GcInfo gcinfo = gc.getLastGcInfo();
+       ...
+   }
+</pre>
+</blockquote>
+
+<p>
+2) 通过 <tt>MBeanServer</tt> 代理访问 Oracle 特定的 MXBean 接口
+
+<blockquote><pre>
+   MBeanServerConnection mbs;
+
+   // 连接到正在运行的 JVM（或自身）并获取已注册 JVM MXBeans 的 MBeanServerConnection
+   ...
+
+   List&lt;com.sun.management.GarbageCollectorMXBean&gt; mxbeans =
+       ManagementFactory.getPlatformMXBeans(mbs, com.sun.management.GarbageCollectorMXBean.class);
+
+   for (com.sun.management.GarbageCollectorMXBean gc : mxbeans) {
+       // 获取标准属性 "CollectionCount"
+       String count = mxbean.getCollectionCount();
+
+       // 获取平台特定的属性 "LastGcInfo"
+       GcInfo gcinfo = gc.getLastGcInfo();
+       ...
+   }
+</pre></blockquote>
+
+<p>除非另有说明，否则在本包中的任何类或接口的构造函数或方法中传递 <tt>null</tt> 参数
+将导致抛出 {@link java.lang.NullPointerException NullPointerException}。
+
+<p>java.lang.management API 是线程安全的。
+
+@see <a href="../../../javax/management/package-summary.html">
+     JMX 规范。</a>
+
+@author  Mandy Chung
+@since   1.5
+
+</body>
+</html>

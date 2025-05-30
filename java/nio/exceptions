@@ -1,0 +1,31 @@
+# Generated exception classes for java.nio
+
+SINCE=1.4
+PACKAGE=java.nio
+# This year should only change if the generated source is modified.
+COPYRIGHT_YEARS="2000, 2007,"
+
+
+SUPER=RuntimeException
+
+gen BufferOverflowException "
+ * 当相对 <i>put</i> 操作达到目标缓冲区的限制时抛出的未检查异常。" \
+ -5484897634319144535L
+
+gen BufferUnderflowException "
+ * 当相对 <i>get</i> 操作达到源缓冲区的限制时抛出的未检查异常。" \
+ -1713313658691622206L
+
+
+SUPER=IllegalStateException
+
+gen InvalidMarkException "
+ * 当尝试重置一个未定义标记的缓冲区时抛出的未检查异常。" \
+ 1698329710438510774L
+
+
+SUPER=UnsupportedOperationException
+
+gen ReadOnlyBufferException "
+ * 当在只读缓冲区上调用 <tt>put</tt> 或 <tt>compact</tt> 等内容修改方法时抛出的未检查异常。" \
+ -1210063976496234090L

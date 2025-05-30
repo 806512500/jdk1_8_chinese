@@ -1,0 +1,131 @@
+# Generated exception classes for java.nio.channels
+
+SINCE=1.4
+PACKAGE=java.nio.channels
+# This year should only change if the generated source is modified.
+COPYRIGHT_YEARS="2000, 2007,"
+
+
+SUPER=java.io.IOException
+
+gen ClosedChannelException "
+ * 当尝试调用或完成已关闭的通道上的 I/O 操作时抛出的检查异常。这并不一定意味着通道完全关闭。例如，写入端已关闭的套接字通道可能仍然可以读取。" \
+ 882777185433553857L
+
+gen FileLockInterruptionException "
+ * 当一个线程在等待获取文件锁时被另一个线程中断时抛出的检查异常。在抛出此异常之前，先前被阻塞的线程的中断状态将被设置。" \
+ 7104080643653532383L
+
+
+SUPER=ClosedChannelException
+
+gen AsynchronousCloseException "
+ * 当一个线程在 I/O 操作中被阻塞时，另一个线程关闭了通道或通道的一部分时抛出的检查异常。" \
+ 6891178312432313966L
+
+
+SUPER=AsynchronousCloseException
+
+gen ClosedByInterruptException "
+ * 当一个线程在 I/O 操作中被阻塞时被另一个线程中断时抛出的检查异常。在抛出此异常之前，通道将被关闭，先前被阻塞的线程的中断状态将被设置。" \
+ -4488191543534286750L
+
+
+SUPER=IllegalArgumentException
+
+gen IllegalSelectorException "
+ * 当尝试将通道注册到未由创建该通道的提供者创建的选择器时抛出的未检查异常。" \
+ -8406323347253320987L
+
+gen UnresolvedAddressException "
+ * 当尝试在未解析的套接字地址上执行网络操作时抛出的未检查异常。" \
+ 6136959093620794148L
+
+gen UnsupportedAddressTypeException "
+ * 当尝试绑定或连接到不支持的套接字地址类型时抛出的未检查异常。" \
+ -2964323842829700493L
+
+
+SUPER=IllegalStateException
+
+gen AlreadyConnectedException "
+ * 当尝试连接已连接的 {@link SocketChannel} 时抛出的未检查异常。" \
+ -7331895245053773357L
+
+gen ConnectionPendingException "
+ * 当尝试连接一个非阻塞连接操作正在进行的 {@link SocketChannel} 时抛出的未检查异常。" \
+ 2008393366501760879L
+
+gen ClosedSelectorException "
+ * 当尝试在已关闭的选择器上调用 I/O 操作时抛出的未检查异常。" \
+ 6466297122317847835L
+
+gen CancelledKeyException "
+ * 当尝试使用不再有效的选择键时抛出的未检查异常。" \
+ -8438032138028814268L
+
+gen IllegalBlockingModeException "
+ * 当在错误的阻塞模式下调用阻塞模式特定操作时抛出的未检查异常。" \
+ -3335774961855590474L
+
+gen NoConnectionPendingException "
+ * 当在 {@link SocketChannel} 上调用 {@link SocketChannel#finishConnect finishConnect} 方法时，未先成功调用其 {@link SocketChannel#connect connect} 方法时抛出的未检查异常。" \
+ -8296561183633134743L
+
+gen NonReadableChannelException "
+ * 当尝试从未最初打开以进行读取的通道读取时抛出的未检查异常。" \
+ -3200915679294993514L
+
+gen NonWritableChannelException "
+ * 当尝试写入未最初打开以进行写入的通道时抛出的未检查异常。" \
+ -7071230488279011621L
+
+gen NotYetBoundException "
+ * 当尝试在未绑定的服务器套接字通道上调用 I/O 操作时抛出的未检查异常。" \
+ 4640999303950202242L
+
+gen NotYetConnectedException "
+ * 当尝试在未连接的套接字通道上调用 I/O 操作时抛出的未检查异常。" \
+ 4697316551909513464L
+
+gen OverlappingFileLockException "
+ * 当尝试获取与同一 Java 虚拟机中已锁定的区域重叠的文件区域的锁时，或当另一个线程正在等待锁定同一文件的重叠区域时抛出的未检查异常。" \
+ 2047812138163068433L
+
+
+SINCE=1.7
+
+SUPER=java.io.IOException
+
+gen InterruptedByTimeoutException "
+ * 当一个线程在异步操作完成前超时时抛出的检查异常。" \
+ -4268008601014042947L
+
+SUPER=IllegalArgumentException
+
+gen IllegalChannelGroupException "
+ * 当尝试在一个未由同一提供者创建的组中打开通道时抛出的未检查异常。" \
+ -2495041211157744253L
+
+
+SUPER=IllegalStateException
+
+gen AlreadyBoundException "
+ * 当尝试绑定已绑定的网络通道的套接字时抛出的未检查异常。" \
+ 6796072983322737592L
+
+gen AcceptPendingException "
+ * 当尝试在一个通道上启动接受操作时，之前的接受操作尚未完成时抛出的未检查异常。" \
+ 2721339977965416421L
+
+gen ReadPendingException "
+ * 当尝试从异步套接字通道读取时，之前的读取尚未完成时抛出的未检查异常。" \
+ 1986315242191227217L
+
+gen WritePendingException "
+ * 当尝试向异步套接字通道写入时，之前的写入尚未完成时抛出的未检查异常。" \
+ 7031871839266032276L
+
+gen ShutdownChannelGroupException "
+ * 当尝试在一个已关闭的组中构造通道时，或由于通道组已终止而无法调用 I/O 操作的完成处理器时抛出的未检查异常。" \
+ -3903801676350154157L

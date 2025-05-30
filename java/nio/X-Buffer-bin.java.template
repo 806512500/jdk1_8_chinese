@@ -1,0 +1,116 @@
+/*
+ * Copyright (c) 2000, 2002, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
+
+#warn This file is preprocessed before being compiled
+
+class XXX {
+
+#begin
+
+    /**
+     * 相对 <i>get</i> 方法，用于读取 $a$ $type$ 值。
+     *
+     * <p> 从当前缓冲区的位置读取接下来的 $nbytes$ 字节，根据当前的字节顺序将它们组合成 $a$ $type$ 值，
+     * 然后将位置增加 $nbytes$。 </p>
+     *
+     * @return  当前位置的 $type$ 值
+     *
+     * @throws  BufferUnderflowException
+     *          如果缓冲区中剩余的字节少于 $nbytes$
+     */
+    public abstract $type$ get$Type$();
+
+    /**
+     * 相对 <i>put</i> 方法，用于写入 $a$ $type$ 值&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 以当前字节顺序写入包含给定 $type$ 值的 $nbytes$ 字节到当前位置的缓冲区中，然后将位置增加 $nbytes$。 </p>
+     *
+     * @param  value
+     *         要写入的 $type$ 值
+     *
+     * @return  该缓冲区
+     *
+     * @throws  BufferOverflowException
+     *          如果缓冲区中剩余的字节少于 $nbytes$
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果该缓冲区是只读的
+     */
+    public abstract ByteBuffer put$Type$($type$ value);
+
+    /**
+     * 绝对 <i>get</i> 方法，用于读取 $a$ $type$ 值。
+     *
+     * <p> 从给定索引读取 $nbytes$ 字节，根据当前字节顺序将它们组合成 $type$ 值。 </p>
+     *
+     * @param  index
+     *         读取字节的索引
+     *
+     * @return  给定索引处的 $type$ 值
+     *
+     * @throws  IndexOutOfBoundsException
+     *          如果 <tt>index</tt> 为负数
+     *          或不小于缓冲区的限制值减去 $nbytesButOne$
+     */
+    public abstract $type$ get$Type$(int index);
+
+    /**
+     * 绝对 <i>put</i> 方法，用于写入 $a$ $type$ 值&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 以当前字节顺序写入包含给定 $type$ 值的 $nbytes$ 字节到给定索引的缓冲区中。 </p>
+     *
+     * @param  index
+     *         写入字节的索引
+     *
+     * @param  value
+     *         要写入的 $type$ 值
+     *
+     * @return  该缓冲区
+     *
+     * @throws  IndexOutOfBoundsException
+     *          如果 <tt>index</tt> 为负数
+     *          或不小于缓冲区的限制值减去 $nbytesButOne$
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果该缓冲区是只读的
+     */
+    public abstract ByteBuffer put$Type$(int index, $type$ value);
+
+    /**
+     * 创建此字节缓冲区的 $a$ $type$ 缓冲区视图。
+     *
+     * <p> 新缓冲区的内容将从当前缓冲区的位置开始。对当前缓冲区内容的更改将在新缓冲区中可见，反之亦然；
+     * 两个缓冲区的位置、限制和标记值将是独立的。
+     *
+     * <p> 新缓冲区的位置将为零，其容量和限制将是当前缓冲区中剩余字节数除以 $nbytes$，其标记将未定义。
+     * 新缓冲区将为直接缓冲区，当且仅当此缓冲区为直接缓冲区；新缓冲区将为只读缓冲区，当且仅当此缓冲区为只读缓冲区。 </p>
+     *
+     * @return  一个新的 $type$ 缓冲区
+     */
+    public abstract $Type$Buffer as$Type$Buffer();
+
+#end
+
+}

@@ -1,0 +1,45 @@
+html
+<!doctype html public "-//IETF//DTD HTML//EN">
+<html>
+<body bgcolor="white">
+
+
+定义了字符集、解码器和编码器，用于在字节和 Unicode 字符之间进行转换。
+
+<blockquote><table cellspacing=1 cellpadding=0 summary="此包中字符集、解码器和编码器的摘要">
+ <tr><th><p align="left">类名</p></th><th><p align="left">描述</p></th></tr>
+  <tr><td valign=top><tt>{@link java.nio.charset.Charset}</tt></td>
+      <td>字符和字节之间的命名映射</td></tr>
+  <tr><td valign=top><tt>{@link java.nio.charset.CharsetDecoder}</tt></td>
+      <td>将字节解码为字符</td></tr>
+  <tr><td valign=top><tt>{@link java.nio.charset.CharsetEncoder}&nbsp;&nbsp;</tt></td>
+      <td>将字符编码为字节</td></tr>
+  <tr><td valign=top><tt>{@link java.nio.charset.CoderResult}&nbsp;&nbsp;</tt></td>
+      <td>描述编码器结果</td></tr>
+  <tr><td valign=top><tt>{@link java.nio.charset.CodingErrorAction}&nbsp;&nbsp;</tt></td>
+      <td>描述检测到编码错误时应采取的措施</td></tr>
+
+</table></blockquote>
+
+<p> 一个 <i>字符集</i> 是十六位 Unicode 字符序列和字节序列之间的命名映射，如 <a
+href="http://www.ietf.org/rfc/rfc2278.txt"><i>RFC&nbsp;2278</i></a> 中所定义。一个 <i>解码器</i> 是将特定字符集中的字节转换为字符的引擎，而一个 <i>编码器</i> 是将字符转换为字节的引擎。编码器和解码器在字节缓冲区和字符缓冲区上操作。它们统称为 <i>编码器</i>。
+
+<p> {@link java.nio.charset.Charset} 类定义了为给定字符集创建编码器的方法，以及检索与字符集相关联的各种名称的方法。它还定义了静态方法，用于测试特定字符集是否受支持，按名称查找字符集实例，以及构建一个包含当前 Java 虚拟机中所有可用字符集的地图。
+
+<p> 大多数用户不会直接使用这些类；相反，他们将使用 {@link
+java.lang.String} 类中现有的与字符集相关的构造函数和方法，以及现有的 {@link
+java.io.InputStreamReader} 和 {@link java.io.OutputStreamWriter} 类，这些类的实现已经重新设计，以利用此包中定义的字符集功能。为了允许在这些类的实例构造中指定显式的字符集对象，对 {@link java.io.InputStreamReader} 和 {@link java.io.OutputStreamWriter} 类进行了一些小的修改。
+
+<p> 可以通过 {@link java.nio.charset.spi.CharsetProvider} 类在 <tt>{@link
+java.nio.charset.spi}</tt> 包中定义的接口来提供对新字符集的支持。
+
+<p> 除非另有说明，否则将 <tt>null</tt> 参数传递给此包中任何类或接口的构造函数或方法将导致抛出 {@link
+java.lang.NullPointerException NullPointerException}。
+
+
+@since 1.4
+@author Mark Reinhold
+@author JSR-51 专家小组
+
+</body>
+</html>

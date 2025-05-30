@@ -1,0 +1,56 @@
+<!--
+ Copyright (c) 1998, 2013, Oracle and/or its affiliates. All rights reserved.
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+ This code is free software; you can redistribute it and/or modify it
+ under the terms of the GNU General Public License version 2 only, as
+ published by the Free Software Foundation.  Oracle designates this
+ particular file as subject to the "Classpath" exception as provided
+ by Oracle in the LICENSE file that accompanied this code.
+
+ This code is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ version 2 for more details (a copy is included in the LICENSE file that
+ accompanied this code).
+
+ You should have received a copy of the GNU General Public License version
+ 2 along with this work; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+ Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ or visit www.oracle.com if you need additional information or have any
+ questions.
+-->
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<body bgcolor="white">
+
+提供支持 RMI 服务器端的类和接口。一组类由 rmic 存根编译器生成的存根和骨架使用。另一组类实现了 RMI 传输协议和 HTTP 隧道。
+
+<p><strong>已弃用：HTTP 隧道。</strong> <em>HTTP 隧道机制已被弃用。请参阅 {@link java.rmi.server.RMISocketFactory} 以获取更多信息。</em>
+
+<p><strong>已弃用：骨架和静态存根。</strong>
+
+<em>骨架和静态生成的存根已被弃用。这包括此包中需要使用骨架或静态存根的 API，它们的运行时支持，以及使用 {@code rmic} 存根编译器生成它们的过程。在平台的未来版本中可能会移除对骨架和静态存根的支持。骨架是不必要的，因为服务器端的方法调度由 RMI 运行时直接处理。静态生成的存根也是不必要的，因为存根是使用 {@link java.lang.reflect.Proxy Proxy} 对象动态生成的。请参阅 {@link java.rmi.server.UnicastRemoteObject UnicastRemoteObject} 以获取有关动态存根生成的信息。生成骨架和静态存根通常作为应用程序构建过程的一部分，通过调用 {@code rmic} 工具来完成。这是不必要的，可以省略对 {@code rmic} 的调用。</em>
+
+<!--
+<h2>包规范</h2>
+
+##### 填写 Java 兼容性工具包所需的任何规范 #####
+<ul>
+  <li><a href="">##### 在此处引用任何 Framemaker 规范 #####</a>
+</ul>
+
+<h2>相关文档</h2>
+
+有关概述、教程、示例、指南和工具文档，请参阅：
+<ul>
+  <li><a href="">##### 在此处引用非规范文档 #####</a>
+</ul>
+-->
+
+@since JDK1.1
+</body>
+</html>

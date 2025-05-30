@@ -1,0 +1,80 @@
+<!--
+ Copyright (c) 1998, 2015, Oracle and/or its affiliates. All rights reserved.
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+ This code is free software; you can redistribute it and/or modify it
+ under the terms of the GNU General Public License version 2 only, as
+ published by the Free Software Foundation.  Oracle designates this
+ particular file as subject to the "Classpath" exception as provided
+ by Oracle in the LICENSE file that accompanied this code.
+
+ This code is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ version 2 for more details (a copy is included in the LICENSE file that
+ accompanied this code).
+
+ You should have received a copy of the GNU General Public License version
+ 2 along with this work; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+ Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ or visit www.oracle.com if you need additional information or have any
+ questions.
+-->
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<body bgcolor="white">
+
+
+提供参考对象类，这些类支持与垃圾收集器的有限交互。程序可以使用参考对象以某种方式维护对其他对象的引用，使得后者对象仍可被收集器回收。程序还可以安排在收集器确定给定对象的可达性发生变化后的一段时间内收到通知。
+
+<h2>包规范</h2>
+
+<em>参考对象</em>封装了对其他对象的引用，使得引用本身可以像任何其他对象一样被检查和操作。提供了三种类型的参考对象，每种类型都比前一种更弱：<em>软</em>、<em>弱</em>和<em>虚</em>。每种类型对应于不同的可达性级别，如下定义。软引用用于实现内存敏感的缓存，弱引用用于实现不会阻止其键（或值）被回收的规范化映射，而虚引用用于安排对象销毁后的清理操作。
+
+<p> 每种参考对象类型都由抽象基类<code>{@link java.lang.ref.Reference}</code>的子类实现。这些子类的一个实例封装了对特定对象的单个引用，称为<em>引用对象</em>。每个参考对象都提供了获取和清除引用的方法。除了清除操作外，参考对象是不可变的，因此不提供<code>set</code>操作。程序可以进一步子类化这些子类，添加所需的字段和方法，或者不加修改地使用这些子类。
+
+
+<h3>通知</h3>
+
+程序可以通过在创建参考对象时将其<em>注册</em>到<em>参考队列</em>来请求在对象的可达性发生变化时收到通知。在垃圾收集器确定引用对象的可达性已变为与参考类型对应的值后的一段时间内，它将清除参考并将其添加到关联的队列中。此时，参考被认为是<em>入队</em>。程序可以通过轮询或阻塞直到参考可用的方式来从队列中移除参考。参考队列由<code>{@link java.lang.ref.ReferenceQueue}</code>类实现。
+
+<p> 注册的参考对象和其队列之间的关系是单向的。也就是说，队列不会跟踪注册到它的参考对象。如果注册的参考对象本身变得不可达，那么它将永远不会入队。使用参考对象的程序有责任确保只要程序对其引用对象感兴趣，这些对象就保持可达。
+
+<p> 虽然一些程序会选择专门分配一个线程来从一个或多个队列中移除参考对象并处理它们，但这绝不是必要的。一种通常有效的方法是在执行其他频繁操作时检查参考队列。例如，使用弱引用实现弱键的哈希表可以在每次访问表时轮询其参考队列。这就是<code>{@link java.util.WeakHashMap}</code>类的工作方式。因为<code>{@link java.lang.ref.ReferenceQueue#poll ReferenceQueue.poll}</code>方法只是检查内部数据结构，所以这个检查将不会给哈希表访问方法增加太多开销。
+
+<a name="reachability"></a>
+<h3>可达性</h3>
+
+从最强到最弱，不同的可达性级别反映了对象的生命周期。它们的操作定义如下：
+
+<ul>
+
+<li> 如果某个线程可以在不遍历任何参考对象的情况下到达一个对象，则该对象是<em>强可达的</em>。新创建的对象由创建它的线程强可达。
+
+<li> 如果一个对象不是强可达的，但可以通过遍历软引用到达，则该对象是<em>软可达的</em>。
+
+<li> 如果一个对象既不是强可达的也不是软可达的，但可以通过遍历弱引用到达，则该对象是<em>弱可达的</em>。当弱引用对象的弱引用被清除时，该对象变得符合最终化条件。
+
+<li> 如果一个对象既不是强可达的、软可达的也不是弱可达的，它已经被最终化，并且某些虚引用引用了它，则该对象是<em>虚可达的</em>。
+
+<li> 最后，如果一个对象在上述任何方式中都不可达，则该对象是<em>不可达的</em>，因此符合回收条件。
+
+</ul>
+
+
+@author	  Mark Reinhold
+@since	  1.2
+
+<!--
+<h2>相关文档</h2>
+
+有关概述、教程、示例、指南和工具文档，请参阅：
+<ul>
+  <li><a href="">##### REFER TO NON-SPEC DOCUMENTATION HERE #####</a>
+</ul>
+-->
+</body>
+</html>

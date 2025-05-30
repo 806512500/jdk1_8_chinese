@@ -1,0 +1,1315 @@
+
+/*
+ * Copyright (c) 2000, 2020, Oracle and/or its affiliates. All rights reserved.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details (a copy is included in the LICENSE file that
+ * accompanied this code).
+ *
+ * You should have received a copy of the GNU General Public License version
+ * 2 along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
+ */
+
+#warn This file is preprocessed before being compiled
+
+package java.nio;
+
+#if[char]
+import java.io.IOException;
+#end[char]
+#if[streamableType]
+import java.util.Spliterator;
+import java.util.stream.StreamSupport;
+import java.util.stream.$Streamtype$Stream;
+#end[streamableType]
+
+/**
+ * $A$ $type$ 缓冲区。
+ *
+ * <p> 本类定义了 {#if[byte]?六:四} 类别的操作，用于
+ * $type$ 缓冲区：
+ *
+ * <ul>
+ *
+ *   <li><p> 绝对和相对 {@link #get() <i>get</i>} 和
+ *   {@link #put($type$) <i>put</i>} 方法，用于读取和写入
+ *   单个 $type$； </p></li>
+ *
+ *   <li><p> 相对 {@link #get($type$[]) <i>bulk get</i>}
+ *   方法，用于将此缓冲区中的连续 $type$ 序列传输到数组中； {#if[!byte]?和}</p></li>
+ *
+ *   <li><p> 相对 {@link #put($type$[]) <i>bulk put</i>}
+ *   方法，用于将 $a$
+ *   $type$ 数组{#if[char]?,&#32;字符串,} 或其他 $type$
+ *   缓冲区中的连续 $type$ 序列传输到此缓冲区；{#if[!byte]?&#32;和} </p></li>
+ *
+#if[byte]
+ *
+ *   <li><p> 绝对和相对 {@link #getChar() <i>get</i>}
+ *   和 {@link #putChar(char) <i>put</i>} 方法，用于读取和
+ *   写入其他基本类型的值，将它们转换为特定字节顺序的字节序列； </p></li>
+ *
+ *   <li><p> 方法用于创建 <i><a href="#views">视图缓冲区</a></i>，
+ *   使字节缓冲区可以被视作包含其他基本类型值的缓冲区；和 </p></li>
+ *
+#end[byte]
+ *
+ *   <li><p> 方法用于 {@link #compact 压缩}、{@link
+ *   #duplicate 复制} 和 {@link #slice 切片}
+ *   $a$ $type$ 缓冲区。  </p></li>
+ *
+ * </ul>
+ *
+ * <p> $Type$ 缓冲区可以通过 {@link #allocate
+ * <i>分配</i>} 创建，分配空间用于缓冲区的
+ *
+#if[byte]
+ *
+ * 内容，或者通过 {@link #wrap($type$[]) <i>包装</i>} 一个
+ * 现有的 $type$ 数组 {#if[char]?或&#32;字符串} 到缓冲区中。
+ *
+#else[byte]
+ *
+ * 内容，通过 {@link #wrap($type$[]) <i>包装</i>} 一个
+ * 现有的 $type$ 数组 {#if[char]?或&#32;字符串} 到缓冲区中，或者通过创建一个
+ * <a href="ByteBuffer.html#views"><i>视图</i></a> 从现有的字节缓冲区创建。
+ *
+#end[byte]
+ *
+#if[byte]
+ *
+ * <a name="direct"></a>
+ * <h2> 直接 <i>vs.</i> 非直接缓冲区 </h2>
+ *
+ * <p> 字节缓冲区可以是 <i>直接</i> 或 <i>非直接</i>。对于直接字节缓冲区，Java虚拟机将尽力直接在其上执行本机I/O操作。也就是说，它将尝试避免在每次调用底层操作系统本机I/O操作之前（或之后）将缓冲区的内容复制到（或从）中间缓冲区。
+ *
+ * <p> 可以通过调用本类的 {@link
+ * #allocateDirect(int) allocateDirect} 工厂方法创建直接字节缓冲区。通过此方法创建的缓冲区通常具有比非直接缓冲区更高的分配和释放成本。直接缓冲区的内容可能位于常规垃圾回收堆之外，因此其对应用程序内存占用的影响可能不明显。因此，建议主要为大、长生命周期的缓冲区分配直接缓冲区，这些缓冲区受底层系统的本机I/O操作影响。通常，只有当直接缓冲区可以显著提高程序性能时，才应分配直接缓冲区。
+ *
+ * <p> 也可以通过 {@link
+ * java.nio.channels.FileChannel#map 映射} 文件的区域直接到内存中来创建直接字节缓冲区。Java平台的实现可能通过JNI从本机代码选择性地支持直接字节缓冲区的创建。如果这些类型的缓冲区实例之一引用了不可访问的内存区域，则尝试访问该区域不会改变缓冲区的内容，并将导致在访问时或稍后抛出未指定的异常。
+ *
+ * <p> 可以通过调用其 {@link #isDirect isDirect} 方法来确定字节缓冲区是直接的还是非直接的。提供此方法是为了在性能关键代码中进行显式的缓冲区管理。
+ *
+ *
+ * <a name="bin"></a>
+ * <h2> 访问二进制数据 </h2>
+ *
+ * <p> 本类定义了读取和写入所有其他基本类型值的方法，除了 <tt>boolean</tt>。基本值根据缓冲区的当前字节顺序转换为（或从）字节序列，字节顺序可以通过 {@link #order order}
+ * 方法检索和修改。特定的字节顺序由 {@link
+ * ByteOrder} 类的实例表示。字节缓冲区的初始顺序始终为 {@link
+ * ByteOrder#BIG_ENDIAN BIG_ENDIAN}。
+ *
+ * <p> 为了访问异构二进制数据，即不同类型的值序列，本类为每种类型定义了一组绝对和相对的 <i>get</i> 和 <i>put</i> 方法。例如，对于32位浮点值，本类定义了：
+ *
+ * <blockquote><pre>
+ * float  {@link #getFloat()}
+ * float  {@link #getFloat(int) getFloat(int index)}
+ *  void  {@link #putFloat(float) putFloat(float f)}
+ *  void  {@link #putFloat(int,float) putFloat(int index, float f)}</pre></blockquote>
+ *
+ * <p> 对于类型 <tt>char</tt>、<tt>short</tt>、<tt>int</tt>、<tt>long</tt> 和 <tt>double</tt> 也定义了相应的 <i>get</i> 和 <i>put</i> 方法。绝对 <i>get</i> 和 <i>put</i> 方法的索引参数是以字节为单位，而不是以正在读取或写入的类型为单位。
+ *
+ * <a name="views"></a>
+ *
+ * <p> 为了访问同构二进制数据，即相同类型的值序列，本类定义了可以创建 <i>视图</i> 的方法，这些视图基于给定的字节缓冲区。视图缓冲区只是另一个缓冲区，其内容由字节缓冲区支持。对字节缓冲区内容的更改将在视图缓冲区中可见，反之亦然；两个缓冲区的位置、限制和标记值是独立的。例如，{@link
+ * #asFloatBuffer() asFloatBuffer} 方法创建了一个由调用该方法的字节缓冲区支持的 {@link FloatBuffer} 类的实例。对于类型 <tt>char</tt>、<tt>short</tt>、<tt>int</tt>、<tt>long</tt> 和 <tt>double</tt> 也定义了相应的视图创建方法。
+ *
+ * <p> 视图缓冲区相比上述类型特定的 <i>get</i> 和 <i>put</i> 方法系列具有三个重要的优势：
+ *
+ * <ul>
+ *
+ *   <li><p> 视图缓冲区不是以字节为单位，而是以类型特定的值大小为单位进行索引；  </p></li>
+ *
+ *   <li><p> 视图缓冲区提供了相对的批量 <i>get</i> 和 <i>put</i>
+ *   方法，可以将连续的值序列在缓冲区和数组或同一类型的其他缓冲区之间传输；和  </p></li>
+ *
+ *   <li><p> 视图缓冲区可能更高效，因为只有当其支持的字节缓冲区为直接时，它才是直接的。  </p></li>
+ *
+ * </ul>
+ *
+ * <p> 视图缓冲区的字节顺序在创建视图时固定为字节缓冲区的字节顺序。 </p>
+ *
+#end[byte]
+*
+#if[!byte]
+ *
+ * <p> 与字节缓冲区一样，$a$ $type$ 缓冲区可以是 <a
+ * href="ByteBuffer.html#direct"><i>直接</i> 或 <i>非直接</i></a>。通过本类的 <tt>wrap</tt> 方法创建的 $type$ 缓冲区将是非直接的。作为字节缓冲区视图创建的 $type$ 缓冲区将是直接的，当且仅当字节缓冲区本身是直接的。可以通过调用 {@link
+ * #isDirect isDirect} 方法来确定 $a$ $type$ 缓冲区是否为直接的。 </p>
+ *
+#end[!byte]
+*
+#if[char]
+ *
+ * <p> 本类实现了 {@link CharSequence} 接口，因此字符缓冲区可以在接受字符序列的任何地方使用，例如在正则表达式包 <tt>{@link java.util.regex}</tt> 中。
+ * </p>
+ *
+#end[char]
+ *
+#if[byte]
+ * <h2> 方法调用链 </h2>
+#end[byte]
+ *
+ * <p> 本类中没有其他值可返回的方法被指定为返回调用它们的缓冲区。这允许方法调用链。
+ *
+#if[byte]
+ *
+ * 例如，以下语句序列
+ *
+ * <blockquote><pre>
+ * bb.putInt(0xCAFEBABE);
+ * bb.putShort(3);
+ * bb.putShort(45);</pre></blockquote>
+ *
+ * 可以替换为单个语句
+ *
+ * <blockquote><pre>
+ * bb.putInt(0xCAFEBABE).putShort(3).putShort(45);</pre></blockquote>
+ *
+#end[byte]
+#if[char]
+ *
+ * 例如，以下语句序列
+ *
+ * <blockquote><pre>
+ * cb.put("text/");
+ * cb.put(subtype);
+ * cb.put("; charset=");
+ * cb.put(enc);</pre></blockquote>
+ *
+ * 可以替换为单个语句
+ *
+ * <blockquote><pre>
+ * cb.put("text/").put(subtype).put("; charset=").put(enc);</pre></blockquote>
+ *
+#end[char]
+ *
+ *
+ * @author Mark Reinhold
+ * @author JSR-51 专家组
+ * @since 1.4
+ */
+
+public abstract class $Type$Buffer
+    extends Buffer
+    implements Comparable<$Type$Buffer>{#if[char]?, Appendable, CharSequence, Readable}
+{
+
+    // 这些字段在此处声明而不是在 Heap-X-Buffer 中声明，以减少访问这些值所需的虚拟方法调用次数，这在编码小缓冲区时尤其昂贵。
+    //
+    final $type$[] hb;                  // 仅对堆缓冲区非空
+    final int offset;
+    boolean isReadOnly;                 // 仅对堆缓冲区有效
+
+    // 创建具有给定标记、位置、限制、容量、支持数组和数组偏移量的新缓冲区
+    //
+    $Type$Buffer(int mark, int pos, int lim, int cap,   // 包内私有
+                 $type$[] hb, int offset)
+    {
+        super(mark, pos, lim, cap);
+        this.hb = hb;
+        this.offset = offset;
+    }
+
+    // 创建具有给定标记、位置、限制和容量的新缓冲区
+    //
+    $Type$Buffer(int mark, int pos, int lim, int cap) { // 包内私有
+        this(mark, pos, lim, cap, null, 0);
+    }
+
+#if[byte]
+
+    /**
+     * 分配新的直接 $type$ 缓冲区。
+     *
+     * <p> 新缓冲区的位置将为零，其限制将为其容量，其标记将未定义，每个元素将初始化为零。是否具有
+     * {@link #hasArray 支持数组} 未指定。
+     *
+     * @param  capacity
+     *         新缓冲区的容量，以 $type$ 为单位
+     *
+     * @return  新的 $type$ 缓冲区
+     *
+     * @throws  IllegalArgumentException
+     *          如果 <tt>capacity</tt> 是负整数
+     */
+    public static $Type$Buffer allocateDirect(int capacity) {
+        return new Direct$Type$Buffer(capacity);
+    }
+
+#end[byte]
+
+    /**
+     * 分配新的 $type$ 缓冲区。
+     *
+     * <p> 新缓冲区的位置将为零，其限制将为其容量，其标记将未定义，每个元素将初始化为零。它将具有 {@link #array 支持数组}，
+     * 其 {@link #arrayOffset 数组偏移量} 将为零。
+     *
+     * @param  capacity
+     *         新缓冲区的容量，以 $type$ 为单位
+     *
+     * @return  新的 $type$ 缓冲区
+     *
+     * @throws  IllegalArgumentException
+     *          如果 <tt>capacity</tt> 是负整数
+     */
+    public static $Type$Buffer allocate(int capacity) {
+        if (capacity < 0)
+            throw new IllegalArgumentException();
+        return new Heap$Type$Buffer(capacity, capacity);
+    }
+
+    /**
+     * 将 $a$ $type$ 数组包装为缓冲区。
+     *
+     * <p> 新缓冲区将由给定的 $type$ 数组支持；
+     * 即，对缓冲区的修改将导致数组被修改，反之亦然。新缓冲区的容量将为
+     * <tt>array.length</tt>，其位置将为 <tt>offset</tt>，其限制
+     * 将为 <tt>offset + length</tt>，其标记将未定义。其
+     * {@link #array 支持数组} 将为给定数组，其
+     * {@link #arrayOffset 数组偏移量} 将为零。 </p>
+     *
+     * @param  array
+     *         将支持新缓冲区的数组
+     *
+     * @param  offset
+     *         要使用的子数组的偏移量；必须非负且不大于 <tt>array.length</tt>。新缓冲区的位置
+     *         将设置为此值。
+     *
+     * @param  length
+     *         要使用的子数组的长度；
+     *         必须非负且不大于
+     *         <tt>array.length - offset</tt>。
+     *         新缓冲区的限制将设置为 <tt>offset + length</tt>。
+     *
+     * @return  新的 $type$ 缓冲区
+     *
+     * @throws  IndexOutOfBoundsException
+     *          如果 <tt>offset</tt> 和 <tt>length</tt>
+     *          参数的前置条件不成立
+     */
+    public static $Type$Buffer wrap($type$[] array,
+                                    int offset, int length)
+    {
+        try {
+            return new Heap$Type$Buffer(array, offset, length);
+        } catch (IllegalArgumentException x) {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    /**
+     * 将 $a$ $type$ 数组包装为缓冲区。
+     *
+     * <p> 新缓冲区将由给定的 $type$ 数组支持；
+     * 即，对缓冲区的修改将导致数组被修改，反之亦然。新缓冲区的容量和限制将为
+     * <tt>array.length</tt>，其位置将为零，其标记将未定义。其
+     * {@link #array 支持数组} 将为
+     * 给定数组，其 {@link #arrayOffset 数组偏移量} 将
+     * 为零。 </p>
+     *
+     * @param  array
+     *         将支持此缓冲区的数组
+     *
+     * @return  新的 $type$ 缓冲区
+     */
+    public static $Type$Buffer wrap($type$[] array) {
+        return wrap(array, 0, array.length);
+    }
+
+#if[char]
+
+    /**
+     * 尝试将字符读入指定的字符缓冲区。
+     * 缓冲区用作字符的存储库：唯一的变化是 put 操作的结果。不会对缓冲区进行翻转或重绕。
+     *
+     * @param target 用于读入字符的缓冲区
+     * @return 添加到缓冲区的字符数，或者
+     *         如果此字符源已结束，则返回 -1
+     * @throws IOException 如果发生 I/O 错误
+     * @throws NullPointerException 如果 target 为 null
+     * @throws ReadOnlyBufferException 如果 target 是只读缓冲区
+     * @since 1.5
+     */
+    public int read(CharBuffer target) throws IOException {
+        // 确定可以传输的字符数 n
+        int limit = limit();
+        int pos = position();
+        int remaining = limit - pos;
+        assert remaining >= 0;
+        if (remaining <= 0) // 包括 remaining == 0 的情况
+            return -1;
+
+
+                    int targetRemaining = target.remaining();
+        assert targetRemaining >= 0;
+        if (targetRemaining <= 0) // 包括条件 targetRemaining == 0
+            return 0;
+
+        int n = Math.min(remaining, targetRemaining);
+
+        // 设置源限制以防止目标溢出
+        if (targetRemaining < remaining)
+            limit(pos + n);
+        try {
+            if (n > 0)
+                target.put(this);
+        } finally {
+            limit(limit); // 恢复实际限制
+        }
+        return n;
+    }
+
+    /**
+     * 将字符序列包装成缓冲区。
+     *
+     * <p> 新的只读缓冲区的内容将是给定字符序列的内容。新缓冲区的容量将是
+     * <tt>csq.length()</tt>，其位置将是 <tt>start</tt>，其限制将是 <tt>end</tt>，
+     * 其标记将未定义。 </p>
+     *
+     * @param  csq
+     *         要从中创建新的字符缓冲区的字符序列。
+     *
+     * @param  start
+     *         要使用的第一个字符的索引；
+     *         必须是非负数且不大于 <tt>csq.length()</tt>。新缓冲区的位置将设置为该值。
+     *
+     * @param  end
+     *         要使用的最后一个字符之后的索引；必须不小于 <tt>start</tt> 且不大于
+     *         <tt>csq.length()</tt>。新缓冲区的限制将设置为该值。
+     *
+     * @return  新的字符缓冲区
+     *
+     * @throws  IndexOutOfBoundsException
+     *          如果 <tt>start</tt> 和 <tt>end</tt> 参数的前置条件不成立
+     */
+    public static CharBuffer wrap(CharSequence csq, int start, int end) {
+        try {
+            return new StringCharBuffer(csq, start, end);
+        } catch (IllegalArgumentException x) {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    /**
+     * 将字符序列包装成缓冲区。
+     *
+     * <p> 新的只读缓冲区的内容将是给定字符序列的内容。新缓冲区的容量和限制将是
+     * <tt>csq.length()</tt>，其位置将是零，其标记将未定义。 </p>
+     *
+     * @param  csq
+     *         要从中创建新的字符缓冲区的字符序列。
+     *
+     * @return  新的字符缓冲区
+     */
+    public static CharBuffer wrap(CharSequence csq) {
+        return wrap(csq, 0, csq.length());
+    }
+
+#end[char]
+
+    /**
+     * 创建一个新的 $type$ 缓冲区，其内容是此缓冲区内容的共享子序列。
+     *
+     * <p> 新缓冲区的内容将从此缓冲区的当前位置开始。对此缓冲区内容的更改将在新缓冲区中可见，反之亦然；
+     * 两个缓冲区的位置、限制和标记值将是独立的。
+     *
+     * <p> 新缓冲区的位置将为零，其容量和限制将是此缓冲区中剩余的 $type$ 数量，其标记将未定义。
+     * 新缓冲区将是直接的，当且仅当此缓冲区是直接的，且它将是只读的，当且仅当此缓冲区是只读的。 </p>
+     *
+     * @return  新的 $type$ 缓冲区
+     */
+    public abstract $Type$Buffer slice();
+
+    /**
+     * 创建一个新的 $type$ 缓冲区，其内容与此缓冲区的内容共享。
+     *
+     * <p> 新缓冲区的内容将与此缓冲区的内容相同。对此缓冲区内容的更改将在新缓冲区中可见，反之亦然；
+     * 两个缓冲区的位置、限制和标记值将是独立的。
+     *
+     * <p> 新缓冲区的容量、限制、位置和标记值将与此缓冲区的相同。新缓冲区将是直接的，当且仅当此缓冲区是直接的，
+     * 且它将是只读的，当且仅当此缓冲区是只读的。 </p>
+     *
+     * @return  新的 $type$ 缓冲区
+     */
+    public abstract $Type$Buffer duplicate();
+
+    /**
+     * 创建一个新的只读 $type$ 缓冲区，其内容与此缓冲区的内容共享。
+     *
+     * <p> 新缓冲区的内容将与此缓冲区的内容相同。对此缓冲区内容的更改将在新缓冲区中可见；然而，新缓冲区本身将是只读的，
+     * 并不允许修改共享内容。两个缓冲区的位置、限制和标记值将是独立的。
+     *
+     * <p> 新缓冲区的容量、限制、位置和标记值将与此缓冲区的相同。
+     *
+     * <p> 如果此缓冲区本身是只读的，则此方法的行为与 {@link #duplicate duplicate} 方法完全相同。 </p>
+     *
+     * @return  新的只读 $type$ 缓冲区
+     */
+    public abstract $Type$Buffer asReadOnlyBuffer();
+
+
+    // -- 单例 get/put 方法 --
+
+    /**
+     * 相对 <i>get</i> 方法。读取此缓冲区当前位置的 $type$，然后递增位置。
+     *
+     * @return  缓冲区当前位置的 $type$
+     *
+     * @throws  BufferUnderflowException
+     *          如果缓冲区的当前位置不小于其限制
+     */
+    public abstract $type$ get();
+
+    /**
+     * 相对 <i>put</i> 方法&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 将给定的 $type$ 写入此缓冲区的当前位置，然后递增位置。 </p>
+     *
+     * @param  $x$
+     *         要写入的 $type$
+     *
+     * @return  此缓冲区
+     *
+     * @throws  BufferOverflowException
+     *          如果此缓冲区的当前位置不小于其限制
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果此缓冲区是只读的
+     */
+    public abstract $Type$Buffer put($type$ $x$);
+
+    /**
+     * 绝对 <i>get</i> 方法。读取给定索引处的 $type$。
+     *
+     * @param  index
+     *         要读取 $type$ 的索引
+     *
+     * @return  给定索引处的 $type$
+     *
+     * @throws  IndexOutOfBoundsException
+     *          如果 <tt>index</tt> 为负数或不小于缓冲区的限制
+     */
+    public abstract $type$ get(int index);
+
+#if[streamableType]
+    /**
+     * 绝对 <i>get</i> 方法。在不验证索引的情况下读取给定索引处的 $type$。
+     *
+     * @param  index
+     *         要读取 $type$ 的索引
+     *
+     * @return  给定索引处的 $type$
+     */
+    abstract $type$ getUnchecked(int index);   // 包级私有
+#end[streamableType]
+
+    /**
+     * 绝对 <i>put</i> 方法&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 将给定的 $type$ 写入此缓冲区的给定索引处。 </p>
+     *
+     * @param  index
+     *         要写入 $type$ 的索引
+     *
+     * @param  $x$
+     *         要写入的 $type$ 值
+     *
+     * @return  此缓冲区
+     *
+     * @throws  IndexOutOfBoundsException
+     *          如果 <tt>index</tt> 为负数或不小于缓冲区的限制
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果此缓冲区是只读的
+     */
+    public abstract $Type$Buffer put(int index, $type$ $x$);
+
+
+    // -- 批量 get 操作 --
+
+    /**
+     * 相对批量 <i>get</i> 方法。
+     *
+     * <p> 此方法将 $type$ 从此缓冲区传输到给定的目标数组。如果此缓冲区中剩余的 $type$ 少于请求的数量，
+     * 即，如果 <tt>length</tt>&nbsp;<tt>&gt;</tt>&nbsp;<tt>remaining()</tt>，则不传输任何 $type$ 并抛出
+     * {@link BufferUnderflowException}。
+     *
+     * <p> 否则，此方法将 <tt>length</tt> 个 $type$ 从此缓冲区复制到给定数组，从此缓冲区的当前位置开始，
+     * 从数组的给定偏移量开始。此缓冲区的位置然后递增 <tt>length</tt>。
+     *
+     * <p> 换句话说，形式为 <tt>src.get(dst,&nbsp;off,&nbsp;len)</tt> 的此方法的调用具有与循环
+     *
+     * <pre>{@code
+     *     for (int i = off; i < off + len; i++)
+     *         dst[i] = src.get():
+     * }</pre>
+     *
+     * 完全相同的效果，除了它首先检查此缓冲区中是否有足够的 $type$，并且它可能更高效。
+     *
+     * @param  dst
+     *         要写入 $type$ 的数组
+     *
+     * @param  offset
+     *         要写入的第一个 $type$ 在数组中的偏移量；必须是非负数且不大于
+     *         <tt>dst.length</tt>
+     *
+     * @param  length
+     *         要写入给定数组的最大 $type$ 数量；必须是非负数且不大于
+     *         <tt>dst.length - offset</tt>
+     *
+     * @return  此缓冲区
+     *
+     * @throws  BufferUnderflowException
+     *          如果此缓冲区中剩余的 $type$ 少于 <tt>length</tt>
+     *
+     * @throws  IndexOutOfBoundsException
+     *          如果 <tt>offset</tt> 和 <tt>length</tt> 参数的前置条件不成立
+     */
+    public $Type$Buffer get($type$[] dst, int offset, int length) {
+        checkBounds(offset, length, dst.length);
+        if (length > remaining())
+            throw new BufferUnderflowException();
+        int end = offset + length;
+        for (int i = offset; i < end; i++)
+            dst[i] = get();
+        return this;
+    }
+
+    /**
+     * 相对批量 <i>get</i> 方法。
+     *
+     * <p> 此方法将 $type$ 从此缓冲区传输到给定的目标数组。形式为
+     * <tt>src.get(a)</tt> 的此方法的调用与调用
+     *
+     * <pre>
+     *     src.get(a, 0, a.length) </pre>
+     *
+     * 的行为完全相同。
+     *
+     * @param   dst
+     *          目标数组
+     *
+     * @return  此缓冲区
+     *
+     * @throws  BufferUnderflowException
+     *          如果此缓冲区中剩余的 $type$ 少于 <tt>length</tt>
+     */
+    public $Type$Buffer get($type$[] dst) {
+        return get(dst, 0, dst.length);
+    }
+
+
+    // -- 批量 put 操作 --
+
+    /**
+     * 相对批量 <i>put</i> 方法&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 此方法将给定源缓冲区中剩余的 $type$ 传输到此缓冲区。如果源缓冲区中剩余的 $type$ 多于此缓冲区中剩余的，
+     * 即，如果 <tt>src.remaining()</tt>&nbsp;<tt>&gt;</tt>&nbsp;<tt>remaining()</tt>，则不传输任何 $type$ 并抛出
+     * {@link BufferOverflowException}。
+     *
+     * <p> 否则，此方法将 <i>n</i>&nbsp;=&nbsp;<tt>src.remaining()</tt> 个 $type$ 从给定缓冲区复制到此缓冲区，
+     * 从每个缓冲区的当前位置开始。两个缓冲区的位置然后都递增 <i>n</i>。
+     *
+     * <p> 换句话说，形式为 <tt>dst.put(src)</tt> 的此方法的调用具有与循环
+     *
+     * <pre>
+     *     while (src.hasRemaining())
+     *         dst.put(src.get()); </pre>
+     *
+     * 完全相同的效果，除了它首先检查此缓冲区中是否有足够的空间，并且它可能更高效。
+     *
+     * @param  src
+     *         要从中读取 $type$ 的源缓冲区；不能是此缓冲区
+     *
+     * @return  此缓冲区
+     *
+     * @throws  BufferOverflowException
+     *          如果此缓冲区中没有足够的空间容纳源缓冲区中剩余的 $type$
+     *
+     * @throws  IllegalArgumentException
+     *          如果源缓冲区是此缓冲区
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果此缓冲区是只读的
+     */
+    public $Type$Buffer put($Type$Buffer src) {
+        if (src == this)
+            throw new IllegalArgumentException();
+        if (isReadOnly())
+            throw new ReadOnlyBufferException();
+        int n = src.remaining();
+        if (n > remaining())
+            throw new BufferOverflowException();
+        for (int i = 0; i < n; i++)
+            put(src.get());
+        return this;
+    }
+
+    /**
+     * 相对批量 <i>put</i> 方法&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 此方法将 $type$ 从给定的源数组传输到此缓冲区。如果要从数组中复制的 $type$ 多于此缓冲区中剩余的，
+     * 即，如果 <tt>length</tt>&nbsp;<tt>&gt;</tt>&nbsp;<tt>remaining()</tt>，则不传输任何 $type$ 并抛出
+     * {@link BufferOverflowException}。
+     *
+     * <p> 否则，此方法将 <tt>length</tt> 个 $type$ 从给定数组复制到此缓冲区，从数组的给定偏移量开始，
+     * 从此缓冲区的当前位置开始。此缓冲区的位置然后递增 <tt>length</tt>。
+     *
+     * <p> 换句话说，形式为 <tt>dst.put(src,&nbsp;off,&nbsp;len)</tt> 的此方法的调用具有与循环
+     *
+     * <pre>{@code
+     *     for (int i = off; i < off + len; i++)
+     *         dst.put(a[i]);
+     * }</pre>
+     *
+     * 完全相同的效果，除了它首先检查此缓冲区中是否有足够的空间，并且它可能更高效。
+     *
+     * @param  src
+     *         要从中读取 $type$ 的数组
+     *
+     * @param  offset
+     *         要读取的第一个 $type$ 在数组中的偏移量；必须是非负数且不大于 <tt>array.length</tt>
+     *
+     * @param  length
+     *         要从给定数组读取的 $type$ 数量；必须是非负数且不大于
+     *         <tt>array.length - offset</tt>
+     *
+     * @return  此缓冲区
+     *
+     * @throws  BufferOverflowException
+     *          如果此缓冲区中没有足够的空间
+     *
+     * @throws  IndexOutOfBoundsException
+     *          如果 <tt>offset</tt> 和 <tt>length</tt> 参数的前置条件不成立
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果此缓冲区是只读的
+     */
+    public $Type$Buffer put($type$[] src, int offset, int length) {
+        checkBounds(offset, length, src.length);
+        if (length > remaining())
+            throw new BufferOverflowException();
+        int end = offset + length;
+        for (int i = offset; i < end; i++)
+            this.put(src[i]);
+        return this;
+    }
+
+    /**
+     * 相对批量 <i>put</i> 方法&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 此方法将给定源 $type$ 数组的全部内容传输到此缓冲区。形式为 <tt>dst.put(a)</tt> 的此方法的调用
+     * 与调用
+     *
+     * <pre>
+     *     dst.put(a, 0, a.length) </pre>
+     *
+     * 的行为完全相同。
+     *
+     * @param   src
+     *          源数组
+     *
+     * @return  此缓冲区
+     *
+     * @throws  BufferOverflowException
+     *          如果此缓冲区中没有足够的空间
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果此缓冲区是只读的
+     */
+    public final $Type$Buffer put($type$[] src) {
+        return put(src, 0, src.length);
+    }
+
+
+    /**
+     * 相对批量 <i>put</i> 方法&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 此方法将给定字符串中的 $type$s 转移到此缓冲区。如果要从字符串中复制的 $type$s 比此缓冲区中剩余的 $type$s 更多，即
+     * <tt>end&nbsp;-&nbsp;start</tt>&nbsp;<tt>&gt;</tt>&nbsp;<tt>remaining()</tt>，
+     * 则不复制任何 $type$s 并抛出 {@link
+     * BufferOverflowException}。
+     *
+     * <p> 否则，此方法从给定的字符串中复制
+     * <i>n</i>&nbsp;=&nbsp;<tt>end</tt>&nbsp;-&nbsp;<tt>start</tt> 个 $type$s
+     * 到此缓冲区，从给定的 <tt>start</tt> 索引开始，并从当前缓冲区的位置开始。然后此缓冲区的位置增加 <i>n</i>。
+     *
+     * <p> 换句话说，形式为
+     * <tt>dst.put(src,&nbsp;start,&nbsp;end)</tt> 的此方法调用与以下循环具有完全相同的效果
+     *
+     * <pre>{@code
+     *     for (int i = start; i < end; i++)
+     *         dst.put(src.charAt(i));
+     * }</pre>
+     *
+     * 除了它首先检查此缓冲区是否有足够的空间，并且它可能更高效。
+     *
+     * @param  src
+     *         要从中读取 $type$s 的字符串
+     *
+     * @param  start
+     *         要读取的第一个 $type$ 的索引；必须是非负数且不大于
+     *         <tt>string.length()</tt>
+     *
+     * @param  end
+     *         要读取的最后一个 $type$ 的索引，加一；必须是非负数且不大于
+     *         <tt>string.length()</tt>
+     *
+     * @return  此缓冲区
+     *
+     * @throws  BufferOverflowException
+     *          如果此缓冲区空间不足
+     *
+     * @throws  IndexOutOfBoundsException
+     *          如果 <tt>start</tt> 和 <tt>end</tt> 参数的前置条件不成立
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果此缓冲区是只读的
+     */
+    public $Type$Buffer put(String src, int start, int end) {
+        checkBounds(start, end - start, src.length());
+        if (isReadOnly())
+            throw new ReadOnlyBufferException();
+        if (end - start > remaining())
+            throw new BufferOverflowException();
+        for (int i = start; i < end; i++)
+            this.put(src.charAt(i));
+        return this;
+    }
+
+    /**
+     * 相对批量 <i>put</i> 方法&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 此方法将给定源字符串的全部内容转移到此缓冲区。形式为
+     * <tt>dst.put(s)</tt> 的此方法调用与以下调用具有完全相同的效果
+     *
+     * <pre>
+     *     dst.put(s, 0, s.length()) </pre>
+     *
+     * @param   src
+     *          源字符串
+     *
+     * @return  此缓冲区
+     *
+     * @throws  BufferOverflowException
+     *          如果此缓冲区空间不足
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果此缓冲区是只读的
+     */
+    public final $Type$Buffer put(String src) {
+        return put(src, 0, src.length());
+    }
+
+#end[char]
+
+
+    // -- 其他内容 --
+
+    /**
+     * 告知此缓冲区是否由可访问的 $type$ 数组支持。
+     *
+     * <p> 如果此方法返回 <tt>true</tt>，则可以安全地调用 {@link #array() array}
+     * 和 {@link #arrayOffset() arrayOffset} 方法。
+     * </p>
+     *
+     * @return  <tt>true</tt>，当且仅当此缓冲区由数组支持且不是只读的
+     */
+    public final boolean hasArray() {
+        return (hb != null) && !isReadOnly;
+    }
+
+    /**
+     * 返回支持此缓冲区的 $type$ 数组&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 对此缓冲区内容的修改将导致返回数组内容的修改，反之亦然。
+     *
+     * <p> 在调用此方法之前调用 {@link #hasArray hasArray} 方法以确保此缓冲区具有可访问的后端数组。 </p>
+     *
+     * @return  支持此缓冲区的数组
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果此缓冲区由数组支持但为只读
+     *
+     * @throws  UnsupportedOperationException
+     *          如果此缓冲区没有可访问的后端数组
+     */
+    public final $type$[] array() {
+        if (hb == null)
+            throw new UnsupportedOperationException();
+        if (isReadOnly)
+            throw new ReadOnlyBufferException();
+        return hb;
+    }
+
+    /**
+     * 返回支持此缓冲区的数组中第一个缓冲区元素的偏移量&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 如果此缓冲区由数组支持，则缓冲区位置 <i>p</i>
+     * 对应于数组索引 <i>p</i>&nbsp;+&nbsp;<tt>arrayOffset()</tt>。
+     *
+     * <p> 在调用此方法之前调用 {@link #hasArray hasArray} 方法以确保此缓冲区具有可访问的后端数组。 </p>
+     *
+     * @return  此缓冲区数组中第一个缓冲区元素的偏移量
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果此缓冲区由数组支持但为只读
+     *
+     * @throws  UnsupportedOperationException
+     *          如果此缓冲区没有可访问的后端数组
+     */
+    public final int arrayOffset() {
+        if (hb == null)
+            throw new UnsupportedOperationException();
+        if (isReadOnly)
+            throw new ReadOnlyBufferException();
+        return offset;
+    }
+
+    /**
+     * 压缩此缓冲区&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 缓冲区当前位置和其限制之间的 $type$s，如果有，将被复制到缓冲区的开头。也就是说，
+     * 位于索引 <i>p</i>&nbsp;=&nbsp;<tt>position()</tt> 的 $type$ 将被复制到索引零，
+     * 位于索引 <i>p</i>&nbsp;+&nbsp;1 的 $type$ 将被复制到索引一，依此类推，直到位于索引
+     * <tt>limit()</tt>&nbsp;-&nbsp;1 的 $type$ 被复制到索引
+     * <i>n</i>&nbsp;=&nbsp;<tt>limit()</tt>&nbsp;-&nbsp;<tt>1</tt>&nbsp;-&nbsp;<i>p</i>。
+     * 然后缓冲区的位置被设置为 <i>n+1</i>，其限制被设置为其容量。标记（如果已定义）将被丢弃。
+     *
+     * <p> 缓冲区的位置被设置为复制的 $type$s 数量，而不是零，因此可以立即调用另一个相对 <i>put</i> 方法。 </p>
+     *
+#if[byte]
+     *
+     * <p> 在写入数据到缓冲区后调用此方法，以防写入不完整。例如，以下循环通过缓冲区 <tt>buf</tt> 将字节从一个通道复制到另一个通道：
+     *
+     * <blockquote><pre>{@code
+     *   buf.clear();          // 准备缓冲区以使用
+     *   while (in.read(buf) >= 0 || buf.position != 0) {
+     *       buf.flip();
+     *       out.write(buf);
+     *       buf.compact();    // 防止部分写入
+     *   }
+     * }</pre></blockquote>
+     *
+#end[byte]
+     *
+     * @return  此缓冲区
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果此缓冲区是只读的
+     */
+    public abstract $Type$Buffer compact();
+
+    /**
+     * 告知此 $type$ 缓冲区是否为直接缓冲区。
+     *
+     * @return  <tt>true</tt>，当且仅当此缓冲区是直接缓冲区
+     */
+    public abstract boolean isDirect();
+
+#if[!char]
+
+    /**
+     * 返回一个总结此缓冲区状态的字符串。
+     *
+     * @return  摘要字符串
+     */
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append(getClass().getName());
+        sb.append("[pos=");
+        sb.append(position());
+        sb.append(" lim=");
+        sb.append(limit());
+        sb.append(" cap=");
+        sb.append(capacity());
+        sb.append("]");
+        return sb.toString();
+    }
+
+#end[!char]
+
+
+    // ## 应该在这里使用未检查的访问器以提高速度
+
+    /**
+     * 返回此缓冲区的当前哈希码。
+     *
+     * <p> $type$ 缓冲区的哈希码仅取决于其剩余元素；即，从 <tt>position()</tt> 到
+     * <tt>limit()</tt>&nbsp;-&nbsp;<tt>1</tt> 之间的元素。
+     *
+     * <p> 因为缓冲区的哈希码依赖于内容，所以除非已知其内容不会改变，否则不建议将缓冲区用作哈希映射或类似数据结构中的键。 </p>
+     *
+     * @return  此缓冲区的当前哈希码
+     */
+    public int hashCode() {
+        int h = 1;
+        int p = position();
+        for (int i = limit() - 1; i >= p; i--)
+#if[int]
+            h = 31 * h + get(i);
+#else[int]
+            h = 31 * h + (int)get(i);
+#end[int]
+        return h;
+    }
+
+    /**
+     * 告知此缓冲区是否等于另一个对象。
+     *
+     * <p> 两个 $type$ 缓冲区相等当且仅当：
+     *
+     * <ol>
+     *
+     *   <li><p> 它们具有相同的元素类型，  </p></li>
+     *
+     *   <li><p> 它们具有相同数量的剩余元素，  </p></li>
+     *
+     *   <li><p> 两个剩余元素序列，独立于其起始位置，逐点相等。
+#if[floatingPointType]
+     *   如果
+     *   {@code (a == b) || ($Fulltype$.isNaN(a) && $Fulltype$.isNaN(b))}，
+     *   则认为两个 $type$ 元素 {@code a} 和 {@code b} 相等。
+     *   值 {@code -0.0} 和 {@code +0.0} 被认为是相等的，与 {@link $Fulltype$#equals(Object)} 不同。
+#end[floatingPointType]
+     *   </p></li>
+     *
+     * </ol>
+     *
+     * <p> $type$ 缓冲区与任何其他类型的对象都不相等。 </p>
+     *
+     * @param  ob  要与此缓冲区进行比较的对象
+     *
+     * @return  <tt>true</tt>，当且仅当此缓冲区等于给定对象
+     */
+    public boolean equals(Object ob) {
+        if (this == ob)
+            return true;
+        if (!(ob instanceof $Type$Buffer))
+            return false;
+        $Type$Buffer that = ($Type$Buffer)ob;
+        int thisPos = this.position();
+        int thisLim = this.limit();
+        int thatPos = that.position();
+        int thatLim = that.limit();
+        int thisRem = thisLim - thisPos;
+        int thatRem = thatLim - thatPos;
+        if (thisRem < 0 || thisRem != thatRem)
+            return false;
+        for (int i = thisLim - 1, j = thatLim - 1; i >= thisPos; i--, j--)
+            if (!equals(this.get(i), that.get(j)))
+                return false;
+        return true;
+    }
+
+    private static boolean equals($type$ x, $type$ y) {
+#if[floatingPointType]
+        return (x == y) || ($Fulltype$.isNaN(x) && $Fulltype$.isNaN(y));
+#else[floatingPointType]
+        return x == y;
+#end[floatingPointType]
+    }
+
+    /**
+     * 比较此缓冲区与另一个缓冲区。
+     *
+     * <p> 两个 $type$ 缓冲区通过比较其剩余元素序列的字典序来比较，不考虑每个序列在其对应缓冲区中的起始位置。
+#if[floatingPointType]
+     * 成对的 {@code $type$} 元素比较方式类似于调用
+     * {@link $Fulltype$#compare($type$,$type$)}，但
+     * {@code -0.0} 和 {@code 0.0} 被认为是相等的，
+     * {@code $Fulltype$.NaN} 被认为等于自身且大于所有其他 {@code $type$} 值
+     * （包括 {@code $Fulltype$.POSITIVE_INFINITY}）。
+#else[floatingPointType]
+     * 成对的 {@code $type$} 元素比较方式类似于调用
+     * {@link $Fulltype$#compare($type$,$type$)}。
+#end[floatingPointType]
+     *
+     * <p> $type$ 缓冲区与任何其他类型的对象都不可比较。
+     *
+     * @return  负整数、零或正整数，分别表示此缓冲区小于、等于或大于给定缓冲区
+     */
+    public int compareTo($Type$Buffer that) {
+        int thisPos = this.position();
+        int thisRem = this.limit() - thisPos;
+        int thatPos = that.position();
+        int thatRem = that.limit() - thatPos;
+        int length = Math.min(thisRem, thatRem);
+        if (length < 0)
+            return -1;
+        int n = thisPos + Math.min(thisRem, thatRem);
+        for (int i = thisPos, j = thatPos; i < n; i++, j++) {
+            int cmp = compare(this.get(i), that.get(j));
+            if (cmp != 0)
+                return cmp;
+        }
+        return thisRem - thatRem;
+    }
+
+    private static int compare($type$ x, $type$ y) {
+#if[floatingPointType]
+        return ((x < y)  ? -1 :
+                (x > y)  ? +1 :
+                (x == y) ?  0 :
+                $Fulltype$.isNaN(x) ? ($Fulltype$.isNaN(y) ? 0 : +1) : -1);
+#else[floatingPointType]
+        return $Fulltype$.compare(x, y);
+#end[floatingPointType]
+    }
+
+    // -- 其他 char 相关内容 --
+
+#if[char]
+
+    /**
+     * 返回包含此缓冲区中字符的字符串。
+     *
+     * <p> 结果字符串的第一个字符将是此缓冲区的位置处的字符，而最后一个字符将是索引
+     * <tt>limit()</tt>&nbsp;-&nbsp;1 处的字符。调用此方法不会改变缓冲区的位置。 </p>
+     *
+     * @return  指定的字符串
+     */
+    public String toString() {
+        return toString(position(), limit());
+    }
+
+    abstract String toString(int start, int end);       // 包装私有
+
+    // --- 支持 CharSequence 的方法 ---
+
+    /**
+     * 返回此字符缓冲区的长度。
+     *
+     * <p> 当视为字符序列时，字符缓冲区的长度就是位置（包含）和限制（不包含）之间的字符数；即，等同于
+     * <tt>remaining()</tt>。 </p>
+     *
+     * @return  此字符缓冲区的长度
+     */
+    public final int length() {
+        return remaining();
+    }
+
+    /**
+     * 读取相对于当前位置的指定索引处的字符。
+     *
+     * @param  index
+     *         要读取的字符的索引，相对于位置；必须是非负数且小于 <tt>remaining()</tt>
+     *
+     * @return  索引
+     *          <tt>position()&nbsp;+&nbsp;index</tt> 处的字符
+     *
+     * @throws  IndexOutOfBoundsException
+     *          如果 <tt>index</tt> 的前置条件不成立
+     */
+    public final char charAt(int index) {
+        return get(position() + checkIndex(index, 1));
+    }
+
+    /**
+     * 创建一个新的字符缓冲区，表示此缓冲区的指定子序列，相对于当前位置。
+     *
+     * <p> 新缓冲区将共享此缓冲区的内容；也就是说，如果此缓冲区的内容是可变的，则对一个缓冲区的修改将导致另一个缓冲区的修改。新缓冲区的容量将与此缓冲区相同，其位置将为
+     * <tt>position()</tt>&nbsp;+&nbsp;<tt>start</tt>，其限制将为
+     * <tt>position()</tt>&nbsp;+&nbsp;<tt>end</tt>。新缓冲区将直接，当且仅当此缓冲区直接，且它将只读，当且仅当此缓冲区只读。 </p>
+     *
+     * @param  start
+     *         子序列中第一个字符的索引，相对于当前位置；必须是非负数且不大于 <tt>remaining()</tt>
+     *
+     * @param  end
+     *         子序列中最后一个字符之后的字符的索引，相对于当前位置；必须不小于 <tt>start</tt> 且不大于
+     *         <tt>remaining()</tt>
+     *
+     * @return  新的字符缓冲区
+     *
+     * @throws  IndexOutOfBoundsException
+     *          如果 <tt>start</tt> 和 <tt>end</tt> 的前置条件不成立
+     */
+    public abstract CharBuffer subSequence(int start, int end);
+
+
+    // --- Methods to support Appendable ---
+
+    /**
+     * 将指定的字符序列追加到此缓冲区中&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 以 <tt>dst.append(csq)</tt> 形式调用此方法的行为与以下调用完全相同：
+     *
+     * <pre>
+     *     dst.put(csq.toString()) </pre>
+     *
+     * <p> 根据字符序列 <tt>csq</tt> 的 <tt>toString</tt> 规范，整个序列可能不会被追加。例如，调用字符缓冲区的 {@link $Type$Buffer#toString()
+     * toString} 方法将返回一个子序列，其内容取决于缓冲区的位置和限制。
+     *
+     * @param  csq
+     *         要追加的字符序列。如果 <tt>csq</tt> 为 <tt>null</tt>，则将四个字符 <tt>"null"</tt> 追加到此字符缓冲区。
+     *
+     * @return  此缓冲区
+     *
+     * @throws  BufferOverflowException
+     *          如果此缓冲区空间不足
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果此缓冲区是只读的
+     *
+     * @since  1.5
+     */
+    public $Type$Buffer append(CharSequence csq) {
+        if (csq == null)
+            return put("null");
+        else
+            return put(csq.toString());
+    }
+
+    /**
+     * 将指定字符序列的子序列追加到此缓冲区中&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 当 <tt>csq</tt> 不为 <tt>null</tt> 时，以 <tt>dst.append(csq, start,
+     * end)</tt> 形式调用此方法的行为与以下调用完全相同：
+     *
+     * <pre>
+     *     dst.put(csq.subSequence(start, end).toString()) </pre>
+     *
+     * @param  csq
+     *         要从中追加子序列的字符序列。如果 <tt>csq</tt> 为 <tt>null</tt>，则将字符追加为 <tt>csq</tt> 包含四个字符 <tt>"null"</tt>。
+     *
+     * @return  此缓冲区
+     *
+     * @throws  BufferOverflowException
+     *          如果此缓冲区空间不足
+     *
+     * @throws  IndexOutOfBoundsException
+     *          如果 <tt>start</tt> 或 <tt>end</tt> 为负数，<tt>start</tt>
+     *          大于 <tt>end</tt>，或 <tt>end</tt> 大于 <tt>csq.length()</tt>
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果此缓冲区是只读的
+     *
+     * @since  1.5
+     */
+    public $Type$Buffer append(CharSequence csq, int start, int end) {
+        CharSequence cs = (csq == null ? "null" : csq);
+        return put(cs.subSequence(start, end).toString());
+    }
+
+    /**
+     * 将指定的 $type$ 追加到此缓冲区中&nbsp;&nbsp;<i>(可选操作)</i>。
+     *
+     * <p> 以 <tt>dst.append($x$)</tt> 形式调用此方法的行为与以下调用完全相同：
+     *
+     * <pre>
+     *     dst.put($x$) </pre>
+     *
+     * @param  $x$
+     *         要追加的 16 位 $type$
+     *
+     * @return  此缓冲区
+     *
+     * @throws  BufferOverflowException
+     *          如果此缓冲区空间不足
+     *
+     * @throws  ReadOnlyBufferException
+     *          如果此缓冲区是只读的
+     *
+     * @since  1.5
+     */
+    public $Type$Buffer append($type$ $x$) {
+        return put($x$);
+    }
+
+#end[char]
+
+
+    // -- Other byte stuff: Access to binary data --
+
+#if[!byte]
+
+    /**
+     * 获取此缓冲区的字节顺序。
+     *
+     * <p> 通过分配或包装现有 <tt>$type$</tt> 数组创建的 $type$ 缓冲区的字节顺序是底层硬件的 {@link
+     * ByteOrder#nativeOrder 本地顺序}。作为字节缓冲区的 <a
+     * href="ByteBuffer.html#views">视图</a> 创建的 $type$ 缓冲区的字节顺序是在创建视图时字节缓冲区的顺序。 </p>
+     *
+     * @return  此缓冲区的字节顺序
+     */
+    public abstract ByteOrder order();
+
+#end[!byte]
+
+#if[byte]
+
+    boolean bigEndian                                   // package-private
+        = true;
+    boolean nativeByteOrder                             // package-private
+        = (Bits.byteOrder() == ByteOrder.BIG_ENDIAN);
+
+    /**
+     * 获取此缓冲区的字节顺序。
+     *
+     * <p> 字节顺序用于读取或写入多字节值，以及创建此字节缓冲区的视图。新创建的字节缓冲区的顺序始终为 {@link ByteOrder#BIG_ENDIAN
+     * BIG_ENDIAN}。 </p>
+     *
+     * @return  此缓冲区的字节顺序
+     */
+    public final ByteOrder order() {
+        return bigEndian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
+    }
+
+    /**
+     * 修改此缓冲区的字节顺序。
+     *
+     * @param  bo
+     *         新的字节顺序，
+     *         可以是 {@link ByteOrder#BIG_ENDIAN BIG_ENDIAN}
+     *         或 {@link ByteOrder#LITTLE_ENDIAN LITTLE_ENDIAN}
+     *
+     * @return  此缓冲区
+     */
+    public final $Type$Buffer order(ByteOrder bo) {
+        bigEndian = (bo == ByteOrder.BIG_ENDIAN);
+        nativeByteOrder =
+            (bigEndian == (Bits.byteOrder() == ByteOrder.BIG_ENDIAN));
+        return this;
+    }
+
+    // 未检查的访问器，供 ByteBufferAs-X-Buffer 类使用
+    //
+    abstract byte _get(int i);                          // package-private
+    abstract void _put(int i, byte b);                  // package-private
+
+    // #BIN
+    //
+    // 短整型、字符、整型、长整型、浮点型和双精度浮点型的二进制数据访问方法将插入此处
+
+#end[byte]
+
+#if[streamableType]
+
+#if[char]
+    @Override
+#end[char]
+    public $Streamtype$Stream $type$s() {
+        return StreamSupport.$streamtype$Stream(() -> new $Type$BufferSpliterator(this),
+            Buffer.SPLITERATOR_CHARACTERISTICS, false);
+    }
+
+#end[streamableType]
+
+}

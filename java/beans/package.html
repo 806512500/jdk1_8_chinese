@@ -1,0 +1,138 @@
+<!--
+ Copyright (c) 1998, 2014, Oracle and/or its affiliates. All rights reserved.
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+ This code is free software; you can redistribute it and/or modify it
+ under the terms of the GNU General Public License version 2 only, as
+ published by the Free Software Foundation.  Oracle designates this
+ particular file as subject to the "Classpath" exception as provided
+ by Oracle in the LICENSE file that accompanied this code.
+
+ This code is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ version 2 for more details (a copy is included in the LICENSE file that
+ accompanied this code).
+
+ You should have received a copy of the GNU General Public License version
+ 2 along with this work; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+ Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ or visit www.oracle.com if you need additional information or have any
+ questions.
+-->
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<body bgcolor="white">
+
+包含与开发
+<em>beans</em> -- 基于 JavaBeans&trade; 架构的组件
+相关的类。
+这些类中的一些在 bean 运行在应用程序中时使用。
+例如，事件类被
+用于触发属性和可否决的更改事件（参见
+{@link java.beans.PropertyChangeEvent}）。然而，这个包中的大多数类都是为了被 bean 编辑器（即，用于自定义和组合 bean 以创建应用程序的开发环境）使用。特别是，这些类帮助 bean 编辑器创建一个用户界面，用户可以使用该界面自定义 bean。例如，bean 可能包含一个特殊类型的属性，bean 编辑器可能不知道如何处理。
+通过使用 <code>PropertyEditor</code> 接口，bean 开发者可以
+为这种特殊类型提供一个编辑器。
+
+<p>
+为了最小化 bean 使用的资源，bean 编辑器使用的类仅在 bean 被编辑时加载。
+它们在 bean 运行在应用程序中时不需要，因此不会被加载。这些信息保存在所谓的 bean-info（参见 {@link java.beans.BeanInfo}）中。
+
+<p>
+除非特别说明，null 值或空字符串不是此包中方法的有效参数。如果使用这些参数，可能会看到异常。
+
+<h2>长期持久性</h2>
+
+从 v1.4 开始，
+<code>java.beans</code> 包提供了对
+<em>长期持久性</em> 的支持 -- 以属性值的文本表示形式读取和写入 bean。
+属性值被视为 bean，
+并递归地读取或写入以捕获
+它们的公开可用状态。
+这种方法适合长期存储
+因为它仅依赖于公共 API，
+而不是可能改变的私有实现。
+
+<blockquote>
+<hr>
+<b>注意：</b>
+持久性方案无法自动实例化
+自定义内部类，例如你可能用于事件处理程序的类。
+通过使用 {@link java.beans.EventHandler} 类
+而不是内部类作为自定义事件处理程序，
+可以避免此问题。
+<hr>
+</blockquote>
+
+<p>
+
+你可以使用
+{@link java.beans.XMLDecoder}
+和
+{@link java.beans.XMLEncoder}
+类分别以 XML 格式读取和写入 bean。
+持久性方案的一个显著特点是
+读取 bean 时不需要对 bean 的特殊了解。
+
+<p>
+另一方面，写入 bean 有时需要对 bean 的类型有特殊了解。
+如果 bean 的状态可以
+仅使用无参数构造函数和
+属性的公共 getter 和 setter 方法来表示，
+则不需要特殊了解。
+否则，bean 需要一个自定义的 <em>持久性代理</em> --
+负责写入特定类型 bean 的对象。
+JDK 中提供的所有继承自 <code>java.awt.Component</code> 的类，
+以及它们的所有属性，
+都自动具有持久性代理。
+
+<p>
+
+如果你需要（或选择）为 bean 提供持久性代理，
+可以通过使用
+{@link java.beans.DefaultPersistenceDelegate}
+实例
+或创建 <code>PersistenceDelegate</code> 的子类来实现。
+如果 bean 需要持久性代理的唯一原因是
+你希望使用属性值作为参数调用 bean 的构造函数，
+则可以使用
+<code>DefaultPersistenceDelegate</code>
+的单参数构造函数创建 bean 的持久性代理。
+否则，
+你需要实现自己的持久性代理，
+为此你可能需要以下类：
+
+<dl>
+<dt> {@link java.beans.PersistenceDelegate}
+<dd> 所有持久性代理的抽象基类。
+     你的子类应使用对 bean 类型的了解来提供
+     创建 bean 和恢复其状态所需的 <code>Statement</code> 和 <code>Expression</code>。
+<dt> {@link java.beans.Statement}
+<dd> 表示对对象的单个方法的调用。
+     包括方法的参数集。
+<dt> {@link java.beans.Expression}
+<dd> <code>Statement</code> 的子类，
+     用于返回值的方法。
+</dl>
+
+<p>
+一旦创建了持久性代理，
+你可以使用
+<code>setPersistenceDelegate</code> 方法注册它
+<code>XMLEncoder</code>。
+
+
+<h2>相关文档</h2>
+
+有关概述、架构和教程文档，请参见：
+<ul>
+  <li><a href="http://docs.oracle.com/javase/tutorial/javabeans/">JavaBeans</a>，<em>The Java Tutorial</em> 中的一个教程。
+  <li><a href="http://www.oracle.com/technetwork/java/persistence2-141443.html">Long-Term Persistence</a>，<em>The Swing Connection</em> 中的一篇文章。
+</ul>
+<p>
+
+</body>
+</html>

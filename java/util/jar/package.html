@@ -1,0 +1,60 @@
+html
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<!--
+Copyright (c) 1998, 2006, Oracle and/or its affiliates. All rights reserved.
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+This code is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License version 2 only, as
+published by the Free Software Foundation.  Oracle designates this
+particular file as subject to the "Classpath" exception as provided
+by Oracle in the LICENSE file that accompanied this code.
+
+This code is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+version 2 for more details (a copy is included in the LICENSE file that
+accompanied this code).
+
+You should have received a copy of the GNU General Public License version
+2 along with this work; if not, write to the Free Software Foundation,
+Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+or visit www.oracle.com if you need additional information or have any
+questions.
+-->
+
+</head>
+<body bgcolor="white">
+
+提供用于读取和写入 JAR（Java ARchive）文件格式的类，该格式基于标准 ZIP 文件格式，可选包含一个清单文件。清单存储有关 JAR 文件内容的元信息，并用于签署 JAR 文件。
+
+
+<h2>包规范</h2>
+
+<code>java.util.jar</code> 包基于以下规范：
+<ul>
+  <li><b>Info-ZIP 文件格式</b> - JAR 格式基于 Info-ZIP 文件格式。请参阅
+      <a href="../zip/package-summary.html#package_description">java.util.zip
+      包描述。</a> <p>
+      在 JAR 文件中，所有文件名必须使用 UTF-8 编码。
+<p>
+  <li><a href="../../../../technotes/guides/jar/jar.html">
+      清单和签名规范</a> - 清单格式规范。
+</ul>
+
+<!--
+<h2>相关文档</h2>
+
+有关概述、教程、示例、指南和工具文档，请参阅：
+<ul>
+  <li><a href="">##### 引用非规范文档 #####</a>
+</ul>
+-->
+
+@since 1.2
+</body>
+</html>

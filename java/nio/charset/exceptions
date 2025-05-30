@@ -1,0 +1,25 @@
+# Generated exception classes for java.nio.charset
+
+SINCE=1.4
+PACKAGE=java.nio.charset
+# This year should only change if the generated source is modified.
+COPYRIGHT_YEARS="2000, 2007,"
+
+SUPER=java.io.IOException
+
+gen CharacterCodingException "
+ * 当字符编码或解码错误发生时抛出的检查异常。" \
+ 8421532232154627783L
+
+
+SUPER=IllegalArgumentException
+
+gen IllegalCharsetNameException "
+ * 当一个不是<a href="Charset.html#names">合法字符集名称</a>的字符串被用作字符集名称时抛出的未检查异常。" \
+ 1457525358470002989L \
+ String charsetName CharsetName "非法字符集名称"
+
+gen UnsupportedCharsetException "
+ * 当请求的字符集没有支持时抛出的未检查异常。" \
+ 1490765524727386367L \
+ String charsetName CharsetName "不受支持的字符集名称"

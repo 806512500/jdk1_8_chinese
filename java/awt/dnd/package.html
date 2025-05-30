@@ -1,0 +1,86 @@
+<!--
+ Copyright (c) 1998, 2013, Oracle and/or its affiliates. All rights reserved.
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+ This code is free software; you can redistribute it and/or modify it
+ under the terms of the GNU General Public License version 2 only, as
+ published by the Free Software Foundation.  Oracle designates this
+ particular file as subject to the "Classpath" exception as provided
+ by Oracle in the LICENSE file that accompanied this code.
+
+ This code is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ version 2 for more details (a copy is included in the LICENSE file that
+ accompanied this code).
+
+ You should have received a copy of the GNU General Public License version
+ 2 along with this work; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+ Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ or visit www.oracle.com if you need additional information or have any
+ questions.
+-->
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head><title></title></head>
+<body bgcolor="white">
+
+拖放是一种在许多图形用户界面系统中发现的直接操作手势，它提供了一种在逻辑上与GUI中的表示元素关联的两个实体之间传输信息的机制。通常由用户使用适当的输入设备进行物理手势驱动，拖放不仅提供了在用户导航GUI中的表示元素时，对任何后续数据传输的可能结果进行连续反馈的机制，还提供了进行任何后续数据协商和传输的设施。
+<P>
+此包定义了在Java中执行拖放操作所需的所有类和接口。它定义了拖放源和放置目标类，以及用于传输被拖动数据的事件。此包还提供了一种在整个拖放操作期间向用户显示视觉反馈的手段。
+<P>
+典型的拖放操作可以分解为以下状态（不一定完全按顺序）：
+<UL>
+<LI>一个 <code>DragSource</code> 与GUI中的某个表示元素（<code>Component</code>）关联，以启动某些潜在可<code>Transferable</code>数据的拖放操作。
+<br><br>
+<LI>1个或多个<code>DropTarget</code>与GUI中的表示元素（组件）关联，可能能够消费<code>Transferable</code>数据类型。
+<br><br>
+<LI>从<code>DragSource</code>获取一个<code>DragGestureRecognizer</code>，并将其与一个<code>Component</code>关联，以跟踪和识别用户在<code>Component</code>上的任何拖动启动手势。
+<br><br>
+<LI>用户在<code>Component</code>上进行拖动手势，注册的<code>DragGestureRecognizer</code>检测到该手势，并通知其<code>DragGestureListener</code>。
+<P>
+注意：虽然此API一致地将拖放操作的刺激描述为用户进行的物理手势，但这并不排除在给定适当的<code>DragSource</code>实现的情况下，程序驱动的拖放操作。此包包含用于识别鼠标设备手势的抽象类<code>MouseDragGestureRecognizer</code>。平台可能提供其他抽象子类以支持其他输入设备或特定的<code>Component</code>类语义。
+<br><br>
+<LI><code>DragGestureListener</code>导致<code>DragSource</code>代表用户启动拖放操作，可能动画化GUI光标和/或渲染操作对象的<code>Image</code>。
+<br><br>
+<LI>当用户手势在具有关联<code>DropTarget</code>的GUI中的<code>Component</code>上导航时，<code>DragSource</code>接收通知以提供“拖动经过”反馈效果，而<code>DropTarget</code>接收通知以提供“拖动下方”反馈效果，这些效果基于支持的操作和涉及的数据类型。
+</UL>
+<P>
+
+手势本身在GUI层次结构上移动一个逻辑光标，与GUI组件的几何形状相交，可能导致逻辑“拖动”光标进入、穿过并随后离开<code>Component</code>及其关联的<code>DropTarget</code>。
+<P>
+<code>DragSource</code>对象通常通过动画化与逻辑光标关联的GUI<code>Cursor</code>来向用户显示“拖动经过”反馈。
+<P>
+<code>DropTarget</code>对象通常通过在GUI光标下方的关联GUI<code>Component</code>中渲染动画来向用户显示“拖动下方”反馈。
+<P>
+反馈效果的确定以及数据传输的最终成功或失败（如果发生的话）参数化如下：
+<UL>
+<LI>由用户选择并由<code>DragSource</code>和<code>DropTarget</code>支持的传输“操作”：复制、移动或引用（链接）。
+<br><br>
+<LI>由<code>DragSource</code>提供的数据类型集与<code>DropTarget</code>可理解的数据类型集的交集。
+<br><br>
+<LI>当用户终止拖动操作时，通常会导致成功的放置，<code>DragSource</code>和<code>DropTarget</code>都会收到通知，这些通知包括并导致通过<code>Transferable</code>对象进行的类型协商和数据传输。
+</UL>
+
+<!--
+<h2>Package Specification</h2>
+
+##### FILL IN ANY SPECS NEEDED BY JAVA COMPATIBILITY KIT #####
+<ul>
+  <li><a href="">##### REFER TO ANY FRAMEMAKER SPECIFICATION HERE #####</a>
+</ul>
+
+<h2>Related Documentation</h2>
+
+For overviews, tutorials, examples, guides, and tool documentation, please see:
+<ul>
+  <li><a href="">##### REFER TO NON-SPEC DOCUMENTATION HERE #####</a>
+</ul>
+-->
+
+@since 1.2
+</body>
+</html>

@@ -1,0 +1,246 @@
+html
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<!--
+ Copyright (c) 1998, 2013, Oracle and/or its affiliates. All rights reserved.
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+This code is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License version 2 only, as
+published by the Free Software Foundation.  Oracle designates this
+particular file as subject to the "Classpath" exception as provided
+by Oracle in the LICENSE file that accompanied this code.
+
+This code is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+version 2 for more details (a copy is included in the LICENSE file that
+accompanied this code).
+
+You should have received a copy of the GNU General Public License version
+2 along with this work; if not, write to the Free Software Foundation,
+Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+or visit www.oracle.com if you need additional information or have any
+questions.
+-->
+
+</head>
+
+
+
+<body bgcolor="white">
+
+提供用于访问和处理存储在数据源（通常是关系数据库）中的数据的 API，使用 Java<sup><font size=-2>TM</font></sup> 编程语言。此 API 包括一个框架，允许动态安装不同的驱动程序以访问不同的数据源。虽然 JDBC<sup><font size=-2>TM</font></sup> API 主要用于将 SQL 语句传递给数据库，但它还提供了从任何具有表格格式的数据源读取和写入数据的功能。通过 <code>javax.sql.RowSet</code> 接口组提供的读取器/写入器设施可以自定义，以使用和更新来自电子表格、平面文件或任何其他表格数据源的数据。
+<P>
+<h2>JDBC<sup><font size=-2>TM</font></sup> 4.2 API 包含的内容</h2>
+JDBC<sup><font size=-2>TM</font></sup> 4.2 API 包含 <code>java.sql</code> 包（称为 JDBC 核心 API）和 <code>javax.sql</code> 包（称为 JDBC 可选包 API）。这个完整的 JDBC API 包含在 Java<sup><font size=-2>TM</font></sup> 标准版（Java SE<sup><font size=-2>TM</font></sup>）7 版中。<code>javax.sql</code> 包扩展了 JDBC API 的功能，从客户端 API 扩展到服务器端 API，是 Java<sup><font size=-2>TM</font></sup> 企业版（Java EE<sup><font size=-2>TM</font></sup>）技术的重要组成部分。
+<P>
+<h2>版本</h2>
+JDBC 4.2 API 包含了所有以前的 JDBC API 版本：
+<UL>
+    <LI>JDBC 4.1 API</li>
+    <LI>JDBC 4.0 API</li>
+    <LI>JDBC 3.0 API</li>
+    <LI>JDBC 2.1 核心 API</li>
+ <LI>JDBC 2.0 可选包 API<br>
+      （注意：JDBC 2.1 核心 API 和 JDBC 2.0 可选包 API 一起被称为 JDBC 2.0 API。）</li>
+ <LI>JDBC 1.2 API</li>
+ <LI>JDBC 1.0 API</li>
+</UL>
+<P>
+类、接口、方法、字段、构造函数和异常具有以下“since”标签，表示它们是在哪个版本的 Java 平台上引入的。当这些“since”标签用于 JDBC API 的 Javadoc<sup><font size=-2>TM</font></sup> 注释中时，它们表示以下内容：
+<UL>
+    <LI>Since 1.8 -- 新增于 JDBC 4.2 API，是 Java SE 平台 8 版的一部分</li>
+ <LI>Since 1.7 -- 新增于 JDBC 4.1 API，是 Java SE 平台 7 版的一部分</li>
+<LI>Since 1.6 -- 新增于 JDBC 4.0 API，是 Java SE 平台 6 版的一部分</li>
+ <LI>Since 1.4 -- 新增于 JDBC 3.0 API，是 J2SE 平台 1.4 版的一部分</li>
+ <LI>Since 1.2 -- 新增于 JDBC 2.0 API，是 J2SE 平台 1.2 版的一部分</li>
+ <LI>Since 1.1 或没有“since”标签 -- 属于原始的 JDBC 1.0 API，是 JDK<sup><font size=-2>TM</font></sup> 1.1 版的一部分</li>
+</UL>
+<P>
+<b>注意：</b>许多新功能是可选的；因此，驱动程序及其支持的功能存在一些差异。在尝试使用某个功能之前，请始终检查驱动程序的文档，以确认它是否支持该功能。
+<P>
+<b>注意：</b><code>SQLPermission</code> 类是在 Java<sup><font size=-2>TM</font></sup> 2 SDK 标准版 1.3 版中添加的。该类用于防止未经授权访问与 <code>DriverManager</code> 关联的日志流，该日志流可能包含表名、列数据等信息。
+<p>
+
+<h2><code>java.sql</code> 包包含的内容</h2>
+<code>java.sql</code> 包包含以下 API：
+<UL>
+  <LI>通过 <code>DriverManager</code> 设施与数据库建立连接
+  <UL>
+	 <LI><code>DriverManager</code> 类 -- 用于与驱动程序建立连接
+	 <LI><code>SQLPermission</code> 类 -- 当在安全管理器（如小程序）中运行的代码尝试通过 <code>DriverManager</code> 设置日志流时提供权限
+	 <LI><code>Driver</code> 接口 -- 提供基于 JDBC 技术（“JDBC 驱动程序”）的驱动程序注册和连接 API；通常仅由 <code>DriverManager</code> 类使用
+	 <LI><code>DriverPropertyInfo</code> 类 -- 提供 JDBC 驱动程序的属性；不供普通用户使用
+  </UL>
+  <LI>向数据库发送 SQL 语句
+  <UL>
+	 <LI><code>Statement</code> -- 用于发送基本的 SQL 语句
+	 <LI><code>PreparedStatement</code> -- 用于发送预编译的语句或基本的 SQL 语句（派生自 <code>Statement</code>）
+	 <LI><code>CallableStatement</code> -- 用于调用数据库存储过程（派生自 <code>PreparedStatement</code>）
+	 <LI><code>Connection</code> 接口 -- 提供创建语句和管理连接及其属性的方法
+	 <LI><code>Savepoint</code> -- 提供事务中的保存点
+  </UL>
+  <LI>检索和更新查询结果
+  <UL>
+	 <LI><code>ResultSet</code> 接口
+  </UL>
+  <LI>SQL 类型到 Java 编程语言中的类和接口的标准映射
+  <UL>
+	 <LI><code>Array</code> 接口 -- SQL <code>ARRAY</code> 的映射
+	 <LI><code>Blob</code> 接口 -- SQL <code>BLOB</code> 的映射
+	 <LI><code>Clob</code> 接口 -- SQL <code>CLOB</code> 的映射
+	 <LI><code>Date</code> 类 -- SQL <code>DATE</code> 的映射
+	  <LI><code>NClob</code> 接口 -- SQL <code>NCLOB</code> 的映射
+	 <LI><code>Ref</code> 接口 -- SQL <code>REF</code> 的映射
+	  <LI><code>RowId</code> 接口 -- SQL <code>ROWID</code> 的映射
+	 <LI><code>Struct</code> 接口 -- SQL <code>STRUCT</code> 的映射
+	  <LI><code>SQLXML</code> 接口 -- SQL <code>XML</code> 的映射
+	 <LI><code>Time</code> 类 -- SQL <code>TIME</code> 的映射
+	 <LI><code>Timestamp</code> 类 -- SQL <code>TIMESTAMP</code> 的映射
+	 <LI><code>Types</code> 类 -- 提供 SQL 类型的常量
+  </UL>
+  <LI>自定义映射 SQL 用户定义类型（UDT）到 Java 编程语言中的类
+  <UL>
+	 <LI><code>SQLData</code> 接口 -- 指定 UDT 到此类实例的映射
+	 <LI><code>SQLInput</code> 接口 -- 提供从流中读取 UDT 属性的方法
+	 <LI><code>SQLOutput</code> 接口 -- 提供将 UDT 属性写回流的方法
+  </UL>
+  <LI>元数据
+  <UL>
+	 <LI><code>DatabaseMetaData</code> 接口 -- 提供关于数据库的信息
+	 <LI><code>ResultSetMetaData</code> 接口 -- 提供关于 <code>ResultSet</code> 对象列的信息
+	 <LI><code>ParameterMetaData</code> 接口 -- 提供关于 <code>PreparedStatement</code> 命令参数的信息
+  </UL>
+  <LI>异常
+	<UL>
+	  <LI><code>SQLException</code> -- 当访问数据出现问题时，大多数方法都会抛出此异常，某些方法也会因其他原因抛出此异常
+	  <LI><code>SQLWarning</code> -- 抛出以指示警告
+	  <LI><code>DataTruncation</code> -- 抛出以指示数据可能已被截断
+	  <LI><code>BatchUpdateException</code> -- 抛出以指示批处理更新中的某些命令未成功执行
+	</UL>
+</UL>
+<P>
+    <h3>在 JDBC 4.2 API 中引入的 <code>java.sql</code> 和 <code>javax.sql</code> 特性</h3>
+<UL>
+    <LI>添加了 <code>JDBCType</code> 枚举和 <code>SQLType</code> 接口</li>
+    <LI>在 <code>CallableStatement</code> 中支持 <code>REF CURSORS</code></LI>
+    <LI><code>DatabaseMetaData</code> 方法返回最大逻辑 LOB 大小和是否支持 Ref Cursors</LI>
+    <LI>添加了对大更新计数的支持</LI>
+</UL>
+<P>
+    <h3>在 JDBC 4.1 API 中引入的 <code>java.sql</code> 和 <code>javax.sql</code> 特性</h3>
+<UL>
+    <LI>允许 <code>Connection</code>、<code>ResultSet</code> 和 <code>Statement</code> 对象与 try-with-resources 语句一起使用</LI>
+    <LI>在 <code>CallableStatement</code> 和 <code>ResultSet</code> 中添加了支持，通过 <code>getObject</code> 方法指定要转换的 Java 类型</LI>
+    <LI><code>DatabaseMetaData</code> 方法返回 PseudoColumns 和是否总是返回生成的键</LI>
+    <LI>添加了支持，允许 <code>Connection</code> 指定数据库模式、中止和超时物理连接</LI>
+    <LI>添加了支持，当其依赖对象已关闭时关闭 <code>Statement</code> 对象</LI>
+    <LI>支持获取 <code>Driver</code>、<code>DataSource</code>、<code>ConnectionPoolDataSource</code> 和 <code>XADataSource</code> 的父日志记录器</LI>
+</UL>
+<h3>在 JDBC 4.0 API 中引入的 <code>java.sql</code> 和 <code>javax.sql</code> 特性</h3>
+<UL>
+  <LI>自动 <code>java.sql.Driver</code> 发现 -- 无需通过 <code>Class.forName</code> 加载 <code>java.sql.Driver</code> 类
+ <LI>添加了对国家字符集的支持
+ <li>添加了对 SQL:2003 XML 数据类型的支
+ <lI>增强的 <code>SQLException</code> -- 添加了对原因链的支持；为常见的 SQLState 类值代码添加了新的 <code>SQLException</code>
+ <li>增强的 Blob/Clob 功能 -- 提供了创建和释放 Blob/Clob 实例的支持，以及添加了提高可访问性的其他方法
+ <li>添加了对访问 SQL ROWID 的支持
+ <li>添加了支持，允许 JDBC 应用程序访问由供应商（通常在应用程序服务器或连接池环境中）包装的 JDBC 资源实例
+ <li>提供了在与 <code>PooledConnection</code> 关联的 <code>PreparedStatement</code> 被关闭或驱动程序确定无效时的通知功能
+</UL>
+<P>
+<P>
+<h3>在 JDBC 3.0 API 中引入的 <code>java.sql</code> 和 <code>javax.sql</code> 特性</h3>
+<UL>
+  <LI>池化语句 -- 与池化连接关联的语句的重用
+  <LI>保存点 -- 允许事务回滚到指定的保存点
+  <LI>为 <code>ConnectionPoolDataSource</code> 定义的属性 -- 指定如何池化连接
+  <LI><code>PreparedStatement</code> 对象参数的元数据
+  <LI>从自动生成的列中检索值的能力
+  <LI>从 <code>CallableStatement</code> 对象返回多个 <code>ResultSet</code> 对象的能力
+  <LI>通过名称以及索引标识 <code>CallableStatement</code> 对象参数的能力
+  <LI><code>ResultSet</code> 保持性 -- 指定事务结束时游标是保持打开还是关闭的能力
+  <LI>检索和更新 <code>Ref</code> 对象引用的 SQL 结构类型实例的能力
+  <LI>编程更新 <code>BLOB</code>、<code>CLOB</code>、<code>ARRAY</code> 和 <code>REF</code> 值的能力
+  <LI>添加了 <code>java.sql.Types.DATALINK</code> 数据类型 -- 允许 JDBC 驱动程序访问存储在数据源外部的对象
+  <LI>添加了用于检索 SQL 类型层次结构的元数据
+</UL>
+<P>
+<h3>在 JDBC 2.1 核心 API 中引入的 <code>java.sql</code> 特性</h3>
+<UL>
+  <LI>可滚动结果集 -- 使用 <code>ResultSet</code> 接口中的新方法，允许将游标移动到特定行或相对于当前位置的位置
+  <LI>批处理更新
+  <LI>编程更新 -- 使用 <code>ResultSet</code> 更新方法
+  <LI>新数据类型 -- 映射 SQL3 数据类型的接口
+  <LI>用户定义类型（UDT）的自定义映射
+  <LI>其他特性，包括性能提示、使用字符流、<code>java.math.BigDecimal</code> 值的全精度、额外的安全性和日期、时间和时间戳值中的时区支持
+</UL>
+<P>
+<h3>在 JDBC 2.0 可选包 API 中引入的 <code>javax.sql</code> 特性</h3>
+<UL>
+  <LI><code>DataSource</code> 接口作为建立连接的手段。Java 命名和目录接口<sup><font size=-2>TM</font></sup>（JNDI）用于在命名服务中注册 <code>DataSource</code> 对象以及检索它。
+  <LI>池化连接 -- 允许连接被使用和重用
+  <LI>分布式事务 -- 允许事务跨越不同的 DBMS 服务器
+  <LI><code>RowSet</code> 技术 -- 提供处理和传递数据的便捷手段
+</UL>
+<P>
+<P>
+<h3>UDT 的自定义映射</h3>
+在 SQL 中定义的用户定义类型（UDT）可以映射到 Java 编程语言中的类。SQL 结构类型或 SQL <code>DISTINCT</code> 类型是可以自定义映射的 UDT。以下三个步骤设置自定义映射：
+<ol>
+  <li>在 SQL 中定义 SQL 结构类型或 <code>DISTINCT</code> 类型
+  <li>在 Java 编程语言中定义 SQL UDT 将映射到的类。此类必须实现 <code>SQLData</code> 接口。
+  <li>在 <code>Connection</code> 对象的类型映射中进行条目，包含两部分内容：
+   <ul>
+       <li>UDT 的完全限定 SQL 名称
+       <li>实现 <code>SQLData</code> 接口的类的 <code>Class</code> 对象
+   </ul>
+</ol>
+<p>
+当这些设置完成后，调用 <code>ResultSet.getObject</code> 或 <code>CallableStatement.getObject</code> 方法时，将自动检索该 UDT 的自定义映射。此外，<code>PreparedStatement.setObject</code> 方法将自动将对象映射回其 SQL 类型以存储在数据源中。
+
+<h2>包规范</h2>
+
+<ul>
+  <li><a href="http://java.sun.com/products/jdbc/download.html">JDBC 4.0 API 规范</a>
+</ul>
+
+
+    /**
+     * 刷新流。
+     */
+    public void flush() { }
+
+    /**
+     * 关闭流。
+     */
+    public void close() { }
+
+}
+```
+
+```java
+        }
+
+    }
+```
+
+<h2>相关文档</h2>
+
+<ul>
+  <li><a href="../../../technotes/guides/jdbc/getstart/GettingStartedTOC.fm.html">入门指南</a>--主要接口的概述
+<P>
+  <li><a href="http://java.sun.com/docs/books/tutorial/jdbc">JDBC API 章节</a>--来自《Java教程续篇》的在线版本
+<P>
+  <li><a href="http://java.sun.com/docs/books/jdbc">
+<i>JDBC<sup><font size=-2>TM</font></sup>API 教程和参考手册，第三版</i></a>--
+JDBC 3.0 API 的完整参考和教程
+</ul>
+<P>
+@since 1.1
+</body>
+</html>

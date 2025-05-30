@@ -1,0 +1,84 @@
+html
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<!--
+Copyright (c) 2001, 2006, Oracle and/or its affiliates. All rights reserved.
+DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+This code is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License version 2 only, as
+published by the Free Software Foundation.  Oracle designates this
+particular file as subject to the "Classpath" exception as provided
+by Oracle in the LICENSE file that accompanied this code.
+
+This code is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+version 2 for more details (a copy is included in the LICENSE file that
+accompanied this code).
+
+You should have received a copy of the GNU General Public License version
+2 along with this work; if not, write to the Free Software Foundation,
+Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+or visit www.oracle.com if you need additional information or have any
+questions.
+-->
+
+</head>
+<body bgcolor="white">
+<P>
+提供 Java<SUP><FONT SIZE="-2">TM</FONT></SUP> 2
+平台核心日志记录设施的类和接口。
+日志记录 API 的主要目标是支持在客户现场维护和维护软件。
+
+<P>
+日志的四个主要用途：
+</P>
+
+<OL>
+   <LI> <I>最终用户和系统管理员的问题诊断</I>。 
+          这包括记录可以本地修复或跟踪的常见问题，例如资源不足、安全故障和简单的配置错误。
+        
+   <LI> <I>现场服务工程师的问题诊断</I>。 现场服务工程师使用的日志信息可能比系统管理员所需的日志信息复杂和详细得多。通常，这种信息需要在特定子系统中进行额外的日志记录。
+
+   <LI> <I>开发组织的问题诊断</I>。
+         当现场出现问题时，可能需要将捕获的日志信息返回给原始开发团队进行诊断。这种日志信息可能非常详细且难以理解。这些信息可能包括特定子系统内部执行的详细跟踪。           
+
+   <LI> <I>开发人员的问题诊断</I>。 日志记录 API 也可用于帮助调试正在开发的应用程序。这可能包括目标应用程序生成的日志信息以及较低级别库生成的日志信息。然而，尽管这种用途是合理的，日志记录 API 并不打算替代开发环境中已存在的正常调试和性能分析工具。
+</OL>
+
+</P>
+此包的关键元素包括：
+<UL>
+   <LI> <I>Logger</I>: 应用程序进行日志记录调用的主要实体。Logger 对象用于记录特定系统或应用程序组件的消息。
+   <LI> <I>LogRecord</I>: 用于在日志记录框架和各个日志处理器之间传递日志请求。
+   <LI> <I>Handler</I>: 将 LogRecord 对象导出到各种目的地，包括内存、输出流、控制台、文件和套接字。为此目的存在多种 Handler 子类。第三方可以开发额外的 Handler 并在核心平台之上提供。
+   <LI> <I>Level</I>: 定义了一组标准日志级别，可用于控制日志输出。程序可以配置为输出某些级别的日志，而忽略其他级别的日志。
+   <LI> <I>Filter</I>: 提供比日志级别控制更精细的控制。日志记录 API 支持通用的过滤机制，允许应用程序代码附加任意过滤器来控制日志输出。
+   <LI> <I>Formatter</I>: 提供支持格式化 LogRecord 对象。此包包括两个格式化器，SimpleFormatter 和 XMLFormatter，分别用于以纯文本或 XML 格式格式化日志记录。与 Handler 一样，第三方可以开发额外的 Formatter。
+</UL>
+<P>
+日志记录 API 提供静态和动态配置控制。静态控制使现场服务人员可以设置特定配置，然后使用新的日志设置重新启动应用程序。动态控制允许在当前运行的程序中更新日志配置。API 还允许为系统的不同功能区域启用或禁用日志记录。例如，现场服务工程师可能对跟踪所有 AWT 事件感兴趣，但对套接字事件或内存管理不感兴趣。
+</P>
+
+<h2>空指针</h2>
+<p>
+通常情况下，除非在 javadoc 中另有说明，方法和构造函数如果传递 null 参数将抛出 NullPointerException。唯一广泛的例外是 Logger 类中的日志记录便捷方法（config、entering、exiting、fine、finer、finest、log、logp、logrb、severe、throwing 和 warning 方法）接受除初始 Level 参数（如果有）之外的所有参数的 null 值。
+<p>
+<H2>相关文档</H2>
+<P>
+有关控制流的概述，请参阅
+<a href="../../../../technotes/guides/logging/overview.html">
+Java 日志记录概述</a>。
+</P>
+
+<!-- Put @see and @since tags down here. -->
+
+@since 1.4
+
+
+</body>
+</html>

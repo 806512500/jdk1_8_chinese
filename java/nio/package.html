@@ -1,0 +1,86 @@
+html
+<!doctype html public "-//IETF//DTD HTML//EN">
+<html>
+<body bgcolor="white">
+
+定义了缓冲区，即数据容器，并概述了其他 NIO 包。
+
+
+<p> NIO API 的核心抽象包括： </p>
+
+<ul>
+
+  <li><p> <a href="#buffers"><i>缓冲区</i></a>，即数据容器；
+  </p></li>
+
+  <li><p> <a href="charset/package-summary.html"><i>字符集</i></a> 及其
+  相关的 <i>解码器</i> 和 <i>编码器</i>，<br> 用于在字节和 Unicode 字符之间进行转换； </p></li>
+
+  <li><p> 各种类型的 <a href="channels/package-summary.html"><i>通道</i></a>，表示连接 <br> 到能够执行 I/O 操作的实体；以及 </p></li>
+
+  <li><p> <i>选择器</i> 和 <i>选择键</i>，与 <br>
+  <i>可选择通道</i> 一起定义了 <a
+  href="channels/package-summary.html#multiplex">多路复用、非阻塞 <br>
+  I/O</a>&nbsp;设施。 </p></li>
+
+</ul>
+
+<p> <tt>java.nio</tt> 包定义了缓冲区类，这些类在整个 NIO API 中使用。字符集 API 在 {@link
+java.nio.charset} 包中定义，通道和选择器 API 在 {@link java.nio.channels} 包中定义。每个子包都有自己的服务提供者（SPI）子包，其内容可用于扩展平台的默认实现或构建替代实现。
+
+
+<a name="buffers"> </a>
+
+<blockquote><table cellspacing=1 cellpadding=0 summary="Description of the various buffers">
+  <tr><th><p align="left">缓冲区</p></th><th><p align="left">描述</p></th></tr> 
+  <tr><td valign=top><tt>{@link java.nio.Buffer}</tt></td>
+      <td>位置、限制和容量；
+          <br>清除、翻转、回绕和标记/重置</td></tr>
+  <tr><td valign=top><tt>&nbsp;&nbsp;{@link java.nio.ByteBuffer}</tt></td>
+      <td>获取/放置、压缩、视图；分配、包装</td></tr>
+  <tr><td valign=top><tt>&nbsp;&nbsp;&nbsp;&nbsp;{@link java.nio.MappedByteBuffer}&nbsp;&nbsp;</tt></td>
+      <td>映射到文件的字节缓冲区</td></tr>
+  <tr><td valign=top><tt>&nbsp;&nbsp;{@link java.nio.CharBuffer}</tt></td>
+      <td>获取/放置、压缩；分配、包装</td></tr>
+  <tr><td valign=top><tt>&nbsp;&nbsp;{@link java.nio.DoubleBuffer}</tt></td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;'&nbsp;'</td></tr>
+  <tr><td valign=top><tt>&nbsp;&nbsp;{@link java.nio.FloatBuffer}</tt></td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;'&nbsp;'</td></tr>
+  <tr><td valign=top><tt>&nbsp;&nbsp;{@link java.nio.IntBuffer}</tt></td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;'&nbsp;'</td></tr>
+  <tr><td valign=top><tt>&nbsp;&nbsp;{@link java.nio.LongBuffer}</tt></td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;'&nbsp;'</td></tr>
+  <tr><td valign=top><tt>&nbsp;&nbsp;{@link java.nio.ShortBuffer}</tt></td>
+      <td>&nbsp;&nbsp;&nbsp;&nbsp;'&nbsp;'</td></tr>
+  <tr><td valign=top><tt>{@link java.nio.ByteOrder}</tt></td>
+      <td>类型安全的字节顺序枚举</td></tr>
+</table></blockquote>
+
+<p> <i>缓冲区</i> 是特定基本类型数据的固定量容器。除了其内容外，缓冲区还有 <i>位置</i>，即下一个要读取或写入的元素的索引，以及 <i>限制</i>，即不应读取或写入的第一个元素的索引。基本 {@link java.nio.Buffer} 类定义了这些属性以及 <i>清除</i>、<i>翻转</i> 和 <i>回绕</i> 的方法，用于 <i>标记</i> 当前位置的方法，以及用于 <i>重置</i> 位置到前一个标记的方法。
+
+<p> 每个非布尔基本类型都有一个缓冲区类。每个类定义了一组用于从缓冲区中读取和写入数据的 <i>获取</i> 和 <i>放置</i> 方法，用于 <i>压缩</i>、<i>复制</i> 和 <i>切片</i> 缓冲区的方法，以及用于 <i>分配</i> 新缓冲区和将现有数组 <i>包装</i> 到缓冲区中的静态方法。
+
+<p> 字节缓冲区的独特之处在于它们可以用作 I/O 操作的源和目标。它们还支持其他缓冲区类中未提供的几个特性：
+
+<ul>
+
+  <li><p> 字节缓冲区可以被分配为 <a href="ByteBuffer.html#direct">
+  <i>直接</i></a> 缓冲区，在这种情况下，Java 虚拟机将尽最大努力直接在其上执行本机 I/O 操作。 </p></li>
+
+  <li><p> 字节缓冲区可以通过 {@link
+  java.nio.channels.FileChannel#map <i>映射</i>} 文件的一个区域直接到内存中创建，在这种情况下，{@link java.nio.MappedByteBuffer} 类中定义的几个额外的文件相关操作可用。 </p></li>
+
+  <li><p> 字节缓冲区可以按大端或小端 <a
+  href="ByteOrder.html">字节顺序</a> 访问其内容作为 <a href="ByteBuffer.html#bin">二进制数据</i></a> 的异构或同构序列。 </p></li>
+
+</ul>
+
+<p> 除非另有说明，否则将 <tt>null</tt> 参数传递给此包中任何类或接口的构造函数或方法将导致抛出 {@link
+java.lang.NullPointerException NullPointerException}。
+
+@since 1.4
+@author Mark Reinhold
+@author JSR-51 专家小组
+
+</body>
+</html>
